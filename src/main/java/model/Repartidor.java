@@ -22,7 +22,13 @@ public class Repartidor extends Persona {
 
     @Override
     public String toString() {
-        return "Repartidor{" +super.toString() +
-                "mochilaTermica=" + mochilaTermica;
+        if (mochilaTermica) {
+            return "Repartidor{" + super.toString() +
+                    "mochila Termica= SI";
+
+        }else{
+            return "Repartidor{" + super.toString() +
+                    "mochila Termica= NO";
+        }
     }
 }

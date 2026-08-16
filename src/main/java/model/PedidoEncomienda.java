@@ -8,6 +8,7 @@ public class PedidoEncomienda extends Pedido {
 
     @Override
     public void asignarRepartidor(String nombreRepartidor) {
+        System.out.println("[pedido de encomienda]");
         super.asignarRepartidor(nombreRepartidor);
         System.out.println("Validando peso y embalaje...");
         System.out.println("Repartidor Asignado con exito!");
@@ -17,10 +18,11 @@ public class PedidoEncomienda extends Pedido {
 
     @Override
     public void asignarRepartidor(Repartidor repartidor) {
+        System.out.println("[pedido de encomienda]");
         super.asignarRepartidor(repartidor);
-        System.out.println("Validando peso y embalaje...");
+        System.out.println("Validando peso y embalaje... OK");
         System.out.println("Repartidor Asignado con exito!");
         System.out.println("Repartidor: " + repartidor);
-        System.out.println(this);
+        System.out.println(this+"\n\n");
     }
 }
