@@ -10,7 +10,7 @@ public class PedidoEncomienda extends Pedido {
     public void asignarRepartidor(String nombreRepartidor) {
         System.out.println("[pedido de encomienda]");
         super.asignarRepartidor(nombreRepartidor);
-        System.out.println("Validando peso y embalaje...");
+        System.out.println("Validando peso y embalaje... OK");
         System.out.println("Repartidor Asignado con exito!");
         System.out.println("Repartidor: " + nombreRepartidor);
         System.out.println(this);
@@ -23,6 +23,6 @@ public class PedidoEncomienda extends Pedido {
         System.out.println("Validando peso y embalaje... OK");
         System.out.println("Repartidor Asignado con exito!");
         System.out.println("Repartidor: " + repartidor);
-        System.out.println(this+"\n\n");
+        System.out.println(this);
     }
 }

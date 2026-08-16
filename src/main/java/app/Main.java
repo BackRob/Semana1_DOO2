@@ -2,6 +2,7 @@ package app;
 
 import model.PedidoComida;
 import model.PedidoEncomienda;
+import model.PedidoExpress;
 import model.Repartidor;
 
 import java.time.LocalDate;
@@ -17,6 +18,10 @@ public class Main {
         //pedido de emcomienda
         PedidoEncomienda pedidoEncomienda1 = new PedidoEncomienda(2,"Volcan quilpue #024");
         pedidoEncomienda1.asignarRepartidor("Juan Gonzales");
+
+        //pedido express
+        PedidoExpress pedidoExpress1 = new PedidoExpress(3,"trinidad #024");
+        pedidoExpress1.asignarRepartidor("kiko lopez");
     }
 
 }

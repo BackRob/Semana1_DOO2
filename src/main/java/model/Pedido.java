@@ -43,6 +43,6 @@ public abstract class Pedido {
     @Override
     public String toString() {
         return  "idPedido:" + idPedido +
-                ", Direccion de Entrega:'" + direccionEntrega + '\'';
+                ", Direccion de Entrega:'" + direccionEntrega + '\''+"\n";
     }
 }

@@ -10,7 +10,7 @@ public class PedidoExpress extends Pedido {
     public void asignarRepartidor(String nombreRepartidor) {
         super.asignarRepartidor(nombreRepartidor);
         System.out.println("[pedido Express]");
-        System.out.println("Validando repartidor mas cercano...");
+        System.out.println("Validando repartidor mas cercano... OK");
         System.out.println("Repartidor Asignado con exito!");
         System.out.println("Repartidor: " + nombreRepartidor);
         System.out.println(this);
@@ -20,10 +20,10 @@ public class PedidoExpress extends Pedido {
     public void asignarRepartidor(Repartidor repartidor) {
         System.out.println("[pedido Express]");
         super.asignarRepartidor(repartidor);
-        System.out.println("Validando repartidor mas cercano...");
+        System.out.println("Validando repartidor mas cercano con disponibilidad inmediata... OK");
         System.out.println("Repartidor Asignado con exito!");
         System.out.println("Repartidor: " + repartidor);
-        System.out.println(this+"\n\n");
+        System.out.println(this);
     }
 
 }

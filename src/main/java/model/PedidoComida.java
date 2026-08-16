@@ -11,7 +11,7 @@ public class PedidoComida extends Pedido {
         if (repartidor.getMochilaTermica()){
             System.out.println("[pedido Comida]");
             super.asignarRepartidor(repartidor);
-            System.out.println("Validando mochila termica...");
+            System.out.println("Validando mochila termica... OK");
             System.out.println("Repartidor Asignado con exito!");
             System.out.println(repartidor);
             System.out.println(this);
@@ -22,9 +22,9 @@ public class PedidoComida extends Pedido {
     public void asignarRepartidor(String nombreRepartidor){
         System.out.println("[pedido de encomienda]");
         super.asignarRepartidor(nombreRepartidor);
-        System.out.println("Validando mochila termica...");
+        System.out.println("Validando mochila termica... OK");
         System.out.println("Repartidor Asignado con exito!");
         System.out.println("Repartidor: " + nombreRepartidor);
-        System.out.println(this+"\n\n");
+        System.out.println(this);
     }
 }
