@@ -2,8 +2,8 @@ package model;
 
 public class PedidoExpress extends Pedido {
 
-    public PedidoExpress(int idPedido, String direccionEntrega) {
-        super(idPedido, direccionEntrega);
+    public PedidoExpress(int idPedido, String direccionEntrega,double distanciaKm) {
+        super(idPedido, direccionEntrega,distanciaKm);
     }
 
     @Override
@@ -24,6 +24,26 @@ public class PedidoExpress extends Pedido {
         System.out.println("Repartidor Asignado con exito!");
         System.out.println("Repartidor: " + repartidor);
         System.out.println(this);
+    }
+
+
+    @Override
+    public void mostrarResumen(){
+        System.out.print("Pedido comida #");
+        System.out.printf("%03d\n", getIdPedido());
+        super.mostrarResumen();
+        calcularTiempoEntrega();
+    }
+
+
+    public void calcularTiempoEntrega(){
+        int tiempoEntrega;
+        if(getDistanciaKm()>5){
+            tiempoEntrega = 15;
+        }else{
+            tiempoEntrega = 10;
+        }
+        System.out.println("Tiempo estimado de entrega: "+tiempoEntrega+" minutos\n");
     }
 
 }
