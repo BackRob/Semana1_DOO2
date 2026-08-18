@@ -3,11 +3,13 @@ package model;
 public abstract class Pedido {
     private int idPedido;
     private String direccionEntrega;
+    private int distanciaKm;
 
     //constructor
-    public Pedido(int idPedido, String direccionEntrega) {
+    public Pedido(int idPedido, String direccionEntrega, int distanciaKm) {
         setIdPedido(idPedido);
         setDireccionEntrega(direccionEntrega);
+        setDistanciaKm(distanciaKm);
     }
 
     //sets
@@ -16,10 +18,14 @@ public abstract class Pedido {
             this.direccionEntrega = direccionEntrega;
         }
     }
-
     public void setIdPedido(int idPedido) {
         if (idPedido > 0) {
             this.idPedido = idPedido;
+        }
+    }
+    public void setDistanciaKm(int distanciaKm) {
+        if (distanciaKm > 0) {
+            this.distanciaKm = distanciaKm;
         }
     }
 
@@ -30,8 +36,9 @@ public abstract class Pedido {
     public String getDireccionEntrega() {
         return direccionEntrega;
     }
+    public int getDistanciaKm() {return distanciaKm;}
 
-    //metodo solicitado y sobrecarga
+    //metodo solicitado y sobrecarga semana 1
     public void asignarRepartidor(Repartidor repartidor) {
         System.out.println("Repartidor esta siendo asignado...");
     }
@@ -39,6 +46,14 @@ public abstract class Pedido {
     public void asignarRepartidor(String nombreRepartidor) {
         System.out.println("Repartidor esta siendo asignado...");
     }
+
+
+    //metodos solicitados
+    public void mostrarResumen(){}
+    public abstract void calcularTiempoEntrega();
+
+
+
 
     @Override
     public String toString() {
