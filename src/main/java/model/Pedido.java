@@ -1,15 +1,21 @@
 package model;
 
-public abstract class Pedido {
+import interfaces.Cancelable;
+import interfaces.Despachable;
+import interfaces.Rastreable;
+
+public abstract class Pedido implements Cancelable, Rastreable, Despachable {
     private int idPedido;
     private String direccionEntrega;
     private double distanciaKm;
+    private String estado;
 
     //constructor
     public Pedido(int idPedido, String direccionEntrega, double distanciaKm) {
         setIdPedido(idPedido);
         setDireccionEntrega(direccionEntrega);
         setDistanciaKm(distanciaKm);
+        estado = "Iniciado";
     }
 
     //sets
@@ -56,12 +62,22 @@ public abstract class Pedido {
     }
     public abstract void calcularTiempoEntrega();
 
-
-
-
+    //METODO ToString
     @Override
     public String toString() {
         return  "idPedido:" + idPedido +
                 ", Direccion de Entrega:'" + direccionEntrega + '\''+"\n";
     }
+
+    //Implementacion Interfases
+    @Override
+    public void cancelar() {}
+
+    @Override
+    public void despachar() {
+    }
+
+    @Override
+    public void verHistorial(){}
+
 }

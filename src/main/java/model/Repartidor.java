@@ -6,10 +6,12 @@ import java.time.LocalDate;
 
 public class Repartidor extends Persona {
     private boolean mochilaTermica;
+    private String estado;
 
     public Repartidor(String nombre, LocalDate fechaNacimiento, String rut,Boolean mochilaTermica) {
         super(nombre, fechaNacimiento, rut);
         setMochilaTermica(mochilaTermica);
+        estado = "En espera";
     }
 
     public void setMochilaTermica(boolean mochilaTermica) {
