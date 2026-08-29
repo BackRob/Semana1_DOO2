@@ -32,7 +32,7 @@ public class PedidoEncomienda extends Pedido {
         calcularTiempoEntrega();
     }
 
-    public void calcularTiempoEntrega(){
-        System.out.println("Tiempo estimado de entrega: "+Math.round(20+1.5*getDistanciaKm())+" minutos");
+    public double calcularTiempoEntrega(){
+        return Math.round(20+1.5*getDistanciaKm());
     }
 }

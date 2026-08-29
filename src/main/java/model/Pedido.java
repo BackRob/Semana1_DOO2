@@ -100,7 +100,7 @@ public abstract class Pedido implements Cancelable, Rastreable, Despachable {
         System.out.println("Direccion: " + getDireccionEntrega());
         System.out.println("Distancia: " + getDistanciaKm());
     }
-    public abstract void calcularTiempoEntrega();
+    public abstract double calcularTiempoEntrega();
 
     //METODO ToString
     @Override
@@ -127,7 +127,7 @@ public abstract class Pedido implements Cancelable, Rastreable, Despachable {
     public void despachar() {
         System.out.println("Despachando Pedido #" +idPedido+ "...");
         if(this.getRepartidor() != null){
-            this.calcularTiempoEntrega();
+            System.out.println("Tiempo estimado de entrega: "+calcularTiempoEntrega()+" minutos");
             System.out.println("Pedido #" +idPedido+ " despachado!\n");
             this.setEstado("Despachado");
         }else{

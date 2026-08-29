@@ -34,14 +34,14 @@ public class PedidoExpress extends Pedido {
     }
 
 
-    public void calcularTiempoEntrega(){
+    public double calcularTiempoEntrega(){
         int tiempoEntrega;
         if(getDistanciaKm()>5){
             tiempoEntrega = 15;
         }else{
             tiempoEntrega = 10;
         }
-        System.out.println("Tiempo estimado de entrega: "+tiempoEntrega+" minutos");
+        return tiempoEntrega;
     }
 
 }
