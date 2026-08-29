@@ -1,5 +1,8 @@
 package model;
 
+import Services.ControladorDeEnvios;
+import interfaces.Despachable;
+
 import static Services.ControladorDeEnvios.getControladorEnvios;
 
 public class PedidoComida extends Pedido {
@@ -36,7 +39,8 @@ public class PedidoComida extends Pedido {
 
     @Override
     public void calcularTiempoEntrega(){
-        System.out.println("Tiempo estimado de entrega: "+(15+2*getDistanciaKm())+" minutos\n");
+        System.out.println("Tiempo estimado de entrega: "+(15+2*getDistanciaKm())+" minutos");
     }
+
 
 }

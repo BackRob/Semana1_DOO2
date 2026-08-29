@@ -33,15 +33,44 @@ public class Main {
         controladorEnvios.agregarRepartidor(r3);
         controladorEnvios.agregarRepartidor(r4);
 
+        System.out.println("--ASIGNAR AUTOMATICO SIN MOCHILA--");
         //Asignar Automatico sin mochila
         controladorEnvios.agregarYAsignarPedidoAuto(pEncomienda);
+        System.out.println("----------------------------------");
 
+
+        System.out.println("--ASIGNAR AUTOMATICO CON MOCHILA--");
         //Asignar Automatico con mochila
         controladorEnvios.agregarYAsignarPedidoAuto(pComida);
+        System.out.println("----------------------------------");
 
 
+        System.out.println("--ASIGNAR MANUAL CON MOCHILA--");
         //Asignar manual
-        controladorEnvios.agregarYAsignarPedidoManual(pComida, "Brian Vallejos"); // pedido duplicado, ya no se vuelve a gestionar.
+        controladorEnvios.agregarYAsignarPedidoManual(pComida, "Brian Vallejos"); // pedido duplicado
+        System.out.println("------------------------------");
+
+
+        System.out.println("--DESPACHAR PEDIDO SIN AGREGAR A CONTROLADOR--");
+        //despachar un pedido aun agregado al controlador
+        pExpress.despachar();
+        System.out.println("----------------------------------------------");
+
+        System.out.println("--CANCELAR PEDIDO--");
+        //Cancelar un pedido ya asignado
+        pComida.cancelar();
+        System.out.println("-------------------");
+
+
+        System.out.println("--Historial de pedido por tipo de pedido comida--");
+        //historial de los pedidos
+        pComida.verHistorial();
+        System.out.println("------------------------------------------");
+
+        System.out.println("--Historial de pedido por tipo de pedido express--");
+        //historial de los pedidos
+        pExpress.verHistorial();
+        System.out.println("--------------------------------------------------");
 
     }
 }

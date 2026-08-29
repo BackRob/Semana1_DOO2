@@ -25,6 +25,14 @@ public class ControladorDeEnvios {
         }
         return instancia;
     }
+
+    //gets
+    public static ArrayList<Despachable> getListaDespachable() {
+        return new ArrayList<>(listaDespachable);
+    }
+
+
+
     //agregar repartidor
     public void agregarRepartidor(Repartidor repartidor) {
         if(repartidor == null){
@@ -91,7 +99,13 @@ public class ControladorDeEnvios {
         if (pedido.getEstado().equals("Iniciado")) {
             pedido.asignarRepartidor();
         }else {
-            System.out.println("Pedido ya se ha gestionado");
+            System.out.println("Pedido ya se ha gestionado\n");
+        }
+    }
+
+    public void mostrarListadespachable(){
+        for (Despachable pedido : listaDespachable){
+            System.out.println(pedido);
         }
     }
 

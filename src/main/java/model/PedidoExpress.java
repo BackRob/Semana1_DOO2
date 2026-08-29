@@ -41,7 +41,7 @@ public class PedidoExpress extends Pedido {
         }else{
             tiempoEntrega = 10;
         }
-        System.out.println("Tiempo estimado de entrega: "+tiempoEntrega+" minutos\n");
+        System.out.println("Tiempo estimado de entrega: "+tiempoEntrega+" minutos");
     }
 
 }

@@ -1,5 +1,6 @@
 package model;
 
+import Services.ControladorDeEnvios;
 import interfaces.Cancelable;
 import interfaces.Despachable;
 import interfaces.Rastreable;
@@ -42,7 +43,7 @@ public abstract class Pedido implements Cancelable, Rastreable, Despachable {
     }
     public void setEstado(String estado) {
         switch (estado) {
-            case "Iniciado","Asignado":
+            case "Iniciado","Asignado","Despachado","Cancelado":
                 this.estado = estado;
         }
     }
@@ -71,8 +72,9 @@ public abstract class Pedido implements Cancelable, Rastreable, Despachable {
     }
 
 
-    //metodo solicitado y sobrecarga semana 1
+    //metodo para asignar, dependiendo el tipo de pedido
     public abstract void asignarRepartidor();
+    //metodo para asignar repartidor automaticamente
     public void asignarRepartidorAutomatico(boolean requiereMochilaTermica){
         Repartidor repartidorAsignado = getControladorEnvios().buscarRepartidorLibre(requiereMochilaTermica);
         if(repartidorAsignado == null){
@@ -86,6 +88,7 @@ public abstract class Pedido implements Cancelable, Rastreable, Despachable {
         repartidorAsignado.setAsignado(true);
         System.out.println(this);
     }
+    //metodo para asignar repartidor Manualmente
     public void asignarRepartidor(String nombreRepartidor) {
         System.out.println("Repartidor esta siendo asignado...");
     }
@@ -102,19 +105,48 @@ public abstract class Pedido implements Cancelable, Rastreable, Despachable {
     //METODO ToString
     @Override
     public String toString() {
-        return  "idPedido:" + idPedido +
-                ", Direccion de Entrega:'" + direccionEntrega + '\''+"\n";
+        return "Pedido{" +
+                "idPedido=" + idPedido +
+                ", direccionEntrega='" + direccionEntrega + '\'' +
+                ", distanciaKm=" + distanciaKm +
+                ", estado='" + estado + '\'' +
+                ", repartidor=" + (repartidor != null ? repartidor.getNombre() : "Sin asignar") +
+                '}';
     }
 
     //Implementacion Interfases
     @Override
-    public void cancelar() {}
-
-    @Override
-    public void despachar() {
+    public void cancelar() {
+        this.setEstado("Cancelado");
+        this.getRepartidor().setAsignado(false);
+        this.setRepartidor(null);
+        System.out.println("Pedido Cancelado");
     }
 
     @Override
-    public void verHistorial(){}
+    public void despachar() {
+        System.out.println("Despachando Pedido #" +idPedido+ "...");
+        if(this.getRepartidor() != null){
+            this.calcularTiempoEntrega();
+            System.out.println("Pedido #" +idPedido+ " despachado!\n");
+            this.setEstado("Despachado");
+        }else{
+            System.out.println("Pedido no asignado");
+            System.out.println("Asignando...");
+            getControladorEnvios().agregarYAsignarPedidoAuto(this);
+            despachar();
+        }
+
+    }
+
+    @Override
+    public void verHistorial() {
+        getControladorEnvios();
+        for (Despachable pedido : ControladorDeEnvios.getListaDespachable()) {
+            if (pedido.getClass() == this.getClass()) {
+                System.out.println(pedido);
+            }
+        }
+    }
 
 }
