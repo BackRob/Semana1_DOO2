@@ -1,5 +1,7 @@
 package model;
 
+import static Services.ControladorDeEnvios.getControladorEnvios;
+
 public class PedidoEncomienda extends Pedido {
 
     public PedidoEncomienda(int idPedido, String direccionEntrega,double distanciaKm) {
@@ -17,12 +19,12 @@ public class PedidoEncomienda extends Pedido {
     }
 
     @Override
-    public void asignarRepartidor(Repartidor repartidor) {
-        System.out.println("[pedido de encomienda]");
-        super.asignarRepartidor(repartidor);
-        System.out.println("Validando peso y embalaje... OK");
+    public void asignarRepartidor() {
+        System.out.println("[pedido Comida]");
+        Repartidor repartidorAsignado = getControladorEnvios().buscarRepartidorLibre(false);
         System.out.println("Repartidor Asignado con exito!");
-        System.out.println("Repartidor: " + repartidor);
+        System.out.println(repartidorAsignado);
+        repartidorAsignado.setAsignado(true);
         System.out.println(this);
     }
 

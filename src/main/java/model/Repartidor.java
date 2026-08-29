@@ -6,12 +6,12 @@ import java.time.LocalDate;
 
 public class Repartidor extends Persona {
     private boolean mochilaTermica;
-    private String estado;
+    private boolean asignado;
 
     public Repartidor(String nombre, LocalDate fechaNacimiento, String rut,Boolean mochilaTermica) {
         super(nombre, fechaNacimiento, rut);
         setMochilaTermica(mochilaTermica);
-        estado = "En espera";
+        asignado = false;
     }
 
     public void setMochilaTermica(boolean mochilaTermica) {
@@ -20,6 +20,9 @@ public class Repartidor extends Persona {
     public boolean getMochilaTermica() {
         return mochilaTermica;
     }
+
+    public void setAsignado(boolean asignado) {this.asignado = asignado;}
+    public boolean getAsignado() {return asignado;}
 
 
     @Override

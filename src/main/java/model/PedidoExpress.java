@@ -1,5 +1,7 @@
 package model;
 
+import static Services.ControladorDeEnvios.getControladorEnvios;
+
 public class PedidoExpress extends Pedido {
 
     public PedidoExpress(int idPedido, String direccionEntrega,double distanciaKm) {
@@ -17,12 +19,12 @@ public class PedidoExpress extends Pedido {
     }
 
     @Override
-    public void asignarRepartidor(Repartidor repartidor) {
-        System.out.println("[pedido Express]");
-        super.asignarRepartidor(repartidor);
-        System.out.println("Validando repartidor mas cercano con disponibilidad inmediata... OK");
+    public void asignarRepartidor() {
+        System.out.println("[pedido Comida]");
+        Repartidor repartidorAsignado = getControladorEnvios().buscarRepartidorLibre(false);
         System.out.println("Repartidor Asignado con exito!");
-        System.out.println("Repartidor: " + repartidor);
+        System.out.println(repartidorAsignado);
+        repartidorAsignado.setAsignado(true);
         System.out.println(this);
     }
 

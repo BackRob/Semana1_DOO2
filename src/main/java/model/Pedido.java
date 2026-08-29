@@ -4,6 +4,8 @@ import interfaces.Cancelable;
 import interfaces.Despachable;
 import interfaces.Rastreable;
 
+import java.util.Objects;
+
 public abstract class Pedido implements Cancelable, Rastreable, Despachable {
     private int idPedido;
     private String direccionEntrega;
@@ -44,11 +46,20 @@ public abstract class Pedido implements Cancelable, Rastreable, Despachable {
     }
     public double getDistanciaKm() {return distanciaKm;}
 
-    //metodo solicitado y sobrecarga semana 1
-    public void asignarRepartidor(Repartidor repartidor) {
-        System.out.println("Repartidor esta siendo asignado...");
+    //Reescritura del HashCode y equals
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof Pedido pedido)) return false;
+        return idPedido == pedido.idPedido;
+    }
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(idPedido);
     }
 
+
+    //metodo solicitado y sobrecarga semana 1
+    public abstract void asignarRepartidor();
     public void asignarRepartidor(String nombreRepartidor) {
         System.out.println("Repartidor esta siendo asignado...");
     }

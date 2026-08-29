@@ -1,5 +1,7 @@
 package model;
 
+import static Services.ControladorDeEnvios.getControladorEnvios;
+
 public class PedidoComida extends Pedido {
     public PedidoComida(int idPedido, String direccionEntrega,double distanciaKm) {
         super(idPedido,direccionEntrega,distanciaKm);
@@ -8,15 +10,14 @@ public class PedidoComida extends Pedido {
 
     //sobrecarga
     @Override
-    public void asignarRepartidor(Repartidor repartidor){
-        if (repartidor.getMochilaTermica()){
+    public void asignarRepartidor(){
             System.out.println("[pedido Comida]");
-            super.asignarRepartidor(repartidor);
-            System.out.println("Validando mochila termica... OK");
+            Repartidor repartidorAsignado = getControladorEnvios().buscarRepartidorLibre(true);
             System.out.println("Repartidor Asignado con exito!");
-            System.out.println(repartidor);
+            System.out.println(repartidorAsignado);
+            repartidorAsignado.setAsignado(true);
             System.out.println(this);
-        }
+
     }
 
     @Override
