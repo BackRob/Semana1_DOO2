@@ -74,6 +74,7 @@ public abstract class Pedido implements Cancelable, Rastreable, Despachable {
 
     //metodo para asignar, dependiendo el tipo de pedido
     public abstract void asignarRepartidor();
+
     //metodo para asignar repartidor automaticamente
     public void asignarRepartidorAutomatico(boolean requiereMochilaTermica){
         Repartidor repartidorAsignado = getControladorEnvios().buscarRepartidorLibre(requiereMochilaTermica);

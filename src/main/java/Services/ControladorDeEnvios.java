@@ -103,11 +103,5 @@ public class ControladorDeEnvios {
         }
     }
 
-    public void mostrarListadespachable(){
-        for (Despachable pedido : listaDespachable){
-            System.out.println(pedido);
-        }
-    }
-
 
 }
