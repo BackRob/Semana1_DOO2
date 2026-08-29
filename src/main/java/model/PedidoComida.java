@@ -11,20 +11,16 @@ public class PedidoComida extends Pedido {
     //sobrecarga
     @Override
     public void asignarRepartidor(){
-            System.out.println("[pedido Comida]");
-            Repartidor repartidorAsignado = getControladorEnvios().buscarRepartidorLibre(true);
-            System.out.println("Repartidor Asignado con exito!");
-            System.out.println(repartidorAsignado);
-            repartidorAsignado.setAsignado(true);
-            System.out.println(this);
-
+            System.out.println("[Pedido Comida]");
+            asignarRepartidorAutomatico(true);
     }
 
     @Override
     public void asignarRepartidor(String nombreRepartidor){
-        System.out.println("[pedido de encomienda]");
+        System.out.println("[pedido de Comida]");
         super.asignarRepartidor(nombreRepartidor);
-        System.out.println("Validando mochila termica... OK");
+        this.setEstado("Asignado");
+        System.out.println("Validando mochila termica... ");
         System.out.println("Repartidor Asignado con exito!");
         System.out.println("Repartidor: " + nombreRepartidor);
         System.out.println(this);

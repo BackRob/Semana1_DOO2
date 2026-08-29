@@ -1,6 +1,7 @@
 package model;
 
 import java.time.LocalDate;
+import java.util.Objects;
 
 public abstract class Persona {
     private String nombre;
@@ -47,5 +48,18 @@ public abstract class Persona {
         return  "Nombre:'" + nombre + '\'' +
                 ", Fecha Nacimiento: " + fechaNacimiento +
                 ", Rut:'" + rut + '\''+ ", ";
+    }
+
+
+    //sobreescritura hashcode y equals
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof Persona persona)) return false;
+        return Objects.equals(rut, persona.rut);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(rut);
     }
 }

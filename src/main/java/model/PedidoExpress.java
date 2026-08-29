@@ -11,7 +11,7 @@ public class PedidoExpress extends Pedido {
     @Override
     public void asignarRepartidor(String nombreRepartidor) {
         super.asignarRepartidor(nombreRepartidor);
-        System.out.println("[pedido Express]");
+        System.out.println("[Pedido Express]");
         System.out.println("Validando repartidor mas cercano... OK");
         System.out.println("Repartidor Asignado con exito!");
         System.out.println("Repartidor: " + nombreRepartidor);
@@ -20,18 +20,14 @@ public class PedidoExpress extends Pedido {
 
     @Override
     public void asignarRepartidor() {
-        System.out.println("[pedido Comida]");
-        Repartidor repartidorAsignado = getControladorEnvios().buscarRepartidorLibre(false);
-        System.out.println("Repartidor Asignado con exito!");
-        System.out.println(repartidorAsignado);
-        repartidorAsignado.setAsignado(true);
-        System.out.println(this);
+        System.out.println("[Pedido Express]");
+        asignarRepartidorAutomatico(false);
     }
 
 
     @Override
     public void mostrarResumen(){
-        System.out.print("Pedido comida #");
+        System.out.print("Pedido Express #");
         System.out.printf("%03d\n", getIdPedido());
         super.mostrarResumen();
         calcularTiempoEntrega();

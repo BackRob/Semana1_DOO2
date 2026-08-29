@@ -6,11 +6,14 @@ import interfaces.Rastreable;
 
 import java.util.Objects;
 
+import static Services.ControladorDeEnvios.getControladorEnvios;
+
 public abstract class Pedido implements Cancelable, Rastreable, Despachable {
     private int idPedido;
     private String direccionEntrega;
     private double distanciaKm;
     private String estado;
+    private Repartidor repartidor;
 
     //constructor
     public Pedido(int idPedido, String direccionEntrega, double distanciaKm) {
@@ -18,6 +21,7 @@ public abstract class Pedido implements Cancelable, Rastreable, Despachable {
         setDireccionEntrega(direccionEntrega);
         setDistanciaKm(distanciaKm);
         estado = "Iniciado";
+        repartidor = null;
     }
 
     //sets
@@ -36,6 +40,13 @@ public abstract class Pedido implements Cancelable, Rastreable, Despachable {
             this.distanciaKm = distanciaKm;
         }
     }
+    public void setEstado(String estado) {
+        switch (estado) {
+            case "Iniciado","Asignado":
+                this.estado = estado;
+        }
+    }
+    public void setRepartidor(Repartidor repartidor) {this.repartidor = repartidor;}
 
     //gets
     public int getIdPedido() {
@@ -45,6 +56,8 @@ public abstract class Pedido implements Cancelable, Rastreable, Despachable {
         return direccionEntrega;
     }
     public double getDistanciaKm() {return distanciaKm;}
+    public String getEstado() {return estado;}
+    public Repartidor getRepartidor() {return repartidor;}
 
     //Reescritura del HashCode y equals
     @Override
@@ -60,6 +73,19 @@ public abstract class Pedido implements Cancelable, Rastreable, Despachable {
 
     //metodo solicitado y sobrecarga semana 1
     public abstract void asignarRepartidor();
+    public void asignarRepartidorAutomatico(boolean requiereMochilaTermica){
+        Repartidor repartidorAsignado = getControladorEnvios().buscarRepartidorLibre(requiereMochilaTermica);
+        if(repartidorAsignado == null){
+            System.out.println("No se encontro repartidor disponible");
+            return;
+        }
+        this.repartidor = repartidorAsignado;
+        this.setEstado("Asignado");
+        System.out.println("Repartidor Asignado con exito!");
+        System.out.println(repartidorAsignado);
+        repartidorAsignado.setAsignado(true);
+        System.out.println(this);
+    }
     public void asignarRepartidor(String nombreRepartidor) {
         System.out.println("Repartidor esta siendo asignado...");
     }

@@ -25,9 +25,21 @@ public class ControladorDeEnvios {
         }
         return instancia;
     }
+    //agregar repartidor
+    public void agregarRepartidor(Repartidor repartidor) {
+        if(repartidor == null){
+            System.out.println("Repartidor nulo");
+            return;
+        }
+        if (listaRepartidor.contains(repartidor)) {
+            System.out.println("ERROR al agregar repartidor con rut: "+repartidor.getRut()+" ya existe");
+        }else {
+            listaRepartidor.add(repartidor);
+        }
+    }
 
     //Agregar Pedido Despachable
-    public void agregarPedido(Despachable pedido){
+    private void agregarPedido(Despachable pedido){
         if (pedido == null) {
             System.out.println("Pedido Nulo");
             return;
@@ -42,12 +54,16 @@ public class ControladorDeEnvios {
 
     //Recorrer repartidores disponibles filtrando por mochila
     public Repartidor buscarRepartidorLibre(boolean requiereMochilaTermica){
+
+        if (requiereMochilaTermica){
+            System.out.println("Validando mochila termica...");
+        }
+
         for (Repartidor repartidor : listaRepartidor){
             if (repartidor.getAsignado()){
                 continue;
             }
             if(requiereMochilaTermica){
-                System.out.println("Validando mochila termica... OK");
                 if (repartidor.getMochilaTermica()){
                     return repartidor;
                 }
@@ -62,13 +78,21 @@ public class ControladorDeEnvios {
     //Agregar pedido y con asignacion manual
     public void agregarYAsignarPedidoManual(Despachable pedido, String repartidor){
         agregarPedido(pedido);
-        pedido.asignarRepartidor(repartidor);
+        if (pedido.getEstado().equals("Iniciado")) {
+            pedido.asignarRepartidor(repartidor);
+        }else {
+            System.out.println("Pedido ya se ha gestionado");
+        }
     }
 
     //Agregar pedido y con asignacion automatica
     public void agregarYAsignarPedidoAuto(Despachable pedido){
         agregarPedido(pedido);
-        pedido.asignarRepartidor();
+        if (pedido.getEstado().equals("Iniciado")) {
+            pedido.asignarRepartidor();
+        }else {
+            System.out.println("Pedido ya se ha gestionado");
+        }
     }
 
 

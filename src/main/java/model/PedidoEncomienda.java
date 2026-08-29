@@ -20,12 +20,8 @@ public class PedidoEncomienda extends Pedido {
 
     @Override
     public void asignarRepartidor() {
-        System.out.println("[pedido Comida]");
-        Repartidor repartidorAsignado = getControladorEnvios().buscarRepartidorLibre(false);
-        System.out.println("Repartidor Asignado con exito!");
-        System.out.println(repartidorAsignado);
-        repartidorAsignado.setAsignado(true);
-        System.out.println(this);
+        System.out.println("[pedido Encomienda]");
+        asignarRepartidorAutomatico(false);
     }
 
     @Override

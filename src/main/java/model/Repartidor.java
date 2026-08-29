@@ -36,4 +36,6 @@ public class Repartidor extends Persona {
                     "mochila Termica= NO";
         }
     }
+
+
 }
