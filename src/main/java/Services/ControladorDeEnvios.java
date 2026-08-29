@@ -27,7 +27,7 @@ public class ControladorDeEnvios {
     }
 
     //gets
-    public static ArrayList<Despachable> getListaDespachable() {
+    public ArrayList<Despachable> getListaDespachable() {
         return new ArrayList<>(listaDespachable);
     }
 

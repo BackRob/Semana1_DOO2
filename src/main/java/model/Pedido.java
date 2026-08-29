@@ -142,7 +142,7 @@ public abstract class Pedido implements Cancelable, Rastreable, Despachable {
     @Override
     public void verHistorial() {
         getControladorEnvios();
-        for (Despachable pedido : ControladorDeEnvios.getListaDespachable()) {
+        for (Despachable pedido : getControladorEnvios().getListaDespachable()) {
             if (pedido.getClass() == this.getClass()) {
                 System.out.println(pedido);
             }
