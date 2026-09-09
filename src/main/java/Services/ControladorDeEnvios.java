@@ -6,7 +6,7 @@ import model.Repartidor;
 
 import java.util.ArrayList;
 
-public class ControladorDeEnvios {
+public class ControladorDeEnvios  {
     //atributos
     private static ControladorDeEnvios instancia;
     private static ArrayList<Despachable> listaDespachable;
@@ -66,7 +66,6 @@ public class ControladorDeEnvios {
         if (requiereMochilaTermica){
             System.out.println("Validando mochila termica...");
         }
-
         for (Repartidor repartidor : listaRepartidor){
             if (repartidor.getAsignado()){
                 continue;
@@ -84,23 +83,15 @@ public class ControladorDeEnvios {
 
 
     //Agregar pedido y con asignacion manual
-    public void agregarYAsignarPedidoManual(Despachable pedido, String repartidor){
+    public void agregarYAsignarPedido(Despachable pedido, String repartidor){
         agregarPedido(pedido);
-        if (pedido.getEstado().equals("Iniciado")) {
             pedido.asignarRepartidor(repartidor);
-        }else {
-            System.out.println("Pedido ya se ha gestionado");
-        }
     }
 
     //Agregar pedido y con asignacion automatica
-    public void agregarYAsignarPedidoAuto(Despachable pedido){
+    public void agregarYAsignarPedido(Despachable pedido){
         agregarPedido(pedido);
-        if (pedido.getEstado().equals("Iniciado")) {
             pedido.asignarRepartidor();
-        }else {
-            System.out.println("Pedido ya se ha gestionado\n");
-        }
     }
 
 

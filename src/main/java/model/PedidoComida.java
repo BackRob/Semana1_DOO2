@@ -18,11 +18,12 @@ public class PedidoComida extends Pedido {
             asignarRepartidorAutomatico(true);
     }
 
+
     @Override
     public void asignarRepartidor(String nombreRepartidor){
         System.out.println("[pedido de Comida]");
         super.asignarRepartidor(nombreRepartidor);
-        this.setEstado("Asignado");
+        this.setEstado(EstadoPedido.ASIGNADO);
         System.out.println("Validando mochila termica... ");
         System.out.println("Repartidor Asignado con exito!");
         System.out.println("Repartidor: " + nombreRepartidor);

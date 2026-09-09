@@ -13,7 +13,7 @@ public abstract class Pedido implements Cancelable, Rastreable, Despachable {
     private int idPedido;
     private String direccionEntrega;
     private double distanciaKm;
-    private String estado;
+    private EstadoPedido estadoPedido;
     private Repartidor repartidor;
 
     //constructor
@@ -21,7 +21,7 @@ public abstract class Pedido implements Cancelable, Rastreable, Despachable {
         setIdPedido(idPedido);
         setDireccionEntrega(direccionEntrega);
         setDistanciaKm(distanciaKm);
-        estado = "Iniciado";
+        estadoPedido = EstadoPedido.INICIADO;
         repartidor = null;
     }
 
@@ -41,11 +41,8 @@ public abstract class Pedido implements Cancelable, Rastreable, Despachable {
             this.distanciaKm = distanciaKm;
         }
     }
-    public void setEstado(String estado) {
-        switch (estado) {
-            case "Iniciado","Asignado","Despachado","Cancelado":
-                this.estado = estado;
-        }
+    public void setEstado(EstadoPedido estadoPedido) {
+                this.estadoPedido = estadoPedido;
     }
     public void setRepartidor(Repartidor repartidor) {this.repartidor = repartidor;}
 
@@ -57,7 +54,7 @@ public abstract class Pedido implements Cancelable, Rastreable, Despachable {
         return direccionEntrega;
     }
     public double getDistanciaKm() {return distanciaKm;}
-    public String getEstado() {return estado;}
+    public String getEstado() {return estadoPedido.toString();}
     public Repartidor getRepartidor() {return repartidor;}
 
     //Reescritura del HashCode y equals
@@ -75,6 +72,26 @@ public abstract class Pedido implements Cancelable, Rastreable, Despachable {
     //metodo para asignar, dependiendo el tipo de pedido
     public abstract void asignarRepartidor();
 
+
+
+    //Agregar utilizando poliformismo
+    public void agregarGestor() {
+        if (estadoPedido!=EstadoPedido.INICIADO) {
+            System.out.println("Pedido ya gestionado");
+            return;
+        }
+        getControladorEnvios().agregarYAsignarPedido(this);
+    }
+    public void agregarGestor(String repartidor) {
+        if (estadoPedido!=EstadoPedido.INICIADO) {
+            System.out.println("Pedido ya gestionado");
+            return;
+        }
+        getControladorEnvios().agregarYAsignarPedido(this, repartidor);
+    }
+
+
+
     //metodo para asignar repartidor automaticamente
     public void asignarRepartidorAutomatico(boolean requiereMochilaTermica){
         Repartidor repartidorAsignado = getControladorEnvios().buscarRepartidorLibre(requiereMochilaTermica);
@@ -83,7 +100,7 @@ public abstract class Pedido implements Cancelable, Rastreable, Despachable {
             return;
         }
         this.repartidor = repartidorAsignado;
-        this.setEstado("Asignado");
+        this.setEstado(EstadoPedido.ASIGNADO);
         System.out.println("Repartidor Asignado con exito!");
         System.out.println(repartidorAsignado);
         repartidorAsignado.setAsignado(true);
@@ -110,7 +127,7 @@ public abstract class Pedido implements Cancelable, Rastreable, Despachable {
                 "idPedido=" + idPedido +
                 ", direccionEntrega='" + direccionEntrega + '\'' +
                 ", distanciaKm=" + distanciaKm +
-                ", estado='" + estado + '\'' +
+                ", estado='" + estadoPedido+ '\'' +
                 ", repartidor=" + (repartidor != null ? repartidor.getNombre() : "Sin asignar") +
                 '}';
     }
@@ -118,7 +135,7 @@ public abstract class Pedido implements Cancelable, Rastreable, Despachable {
     //Implementacion Interfases
     @Override
     public void cancelar() {
-        this.setEstado("Cancelado");
+        this.setEstado(EstadoPedido.CANCELADO);
         this.getRepartidor().setAsignado(false);
         this.setRepartidor(null);
         System.out.println("Pedido Cancelado");
@@ -130,11 +147,11 @@ public abstract class Pedido implements Cancelable, Rastreable, Despachable {
         if(this.getRepartidor() != null){
             System.out.println("Tiempo estimado de entrega: "+calcularTiempoEntrega()+" minutos");
             System.out.println("Pedido #" +idPedido+ " despachado!\n");
-            this.setEstado("Despachado");
+            this.setEstado(EstadoPedido.DESPACHADO);
         }else{
             System.out.println("Pedido no asignado");
             System.out.println("Asignando...");
-            getControladorEnvios().agregarYAsignarPedidoAuto(this);
+            getControladorEnvios().agregarYAsignarPedido(this);
             despachar();
         }
 

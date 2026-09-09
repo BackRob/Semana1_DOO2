@@ -35,24 +35,24 @@ public class Main {
 
         System.out.println("--ASIGNAR AUTOMATICO SIN MOCHILA--");
         //Asignar Automatico sin mochila
-        controladorEnvios.agregarYAsignarPedidoAuto(pEncomienda);
+        pEncomienda.agregarGestor();
         System.out.println("----------------------------------");
 
 
         System.out.println("--ASIGNAR AUTOMATICO CON MOCHILA--");
         //Asignar Automatico con mochila
-        controladorEnvios.agregarYAsignarPedidoAuto(pComida);
+        pComida.agregarGestor();
         System.out.println("----------------------------------");
 
 
         System.out.println("--ASIGNAR MANUAL CON MOCHILA--");
         //Asignar manual
-        controladorEnvios.agregarYAsignarPedidoManual(pComida, "Brian Vallejos"); // pedido duplicado
+        pComida.agregarGestor("Brian Vallejos"); // pedido duplicado
         System.out.println("------------------------------");
 
 
         System.out.println("--DESPACHAR PEDIDO SIN AGREGAR A CONTROLADOR--");
-        //despachar un pedido aun agregado al controlador
+        //despachar un pedido sin haberlo agregado al controlador
         pExpress.despachar();
         System.out.println("----------------------------------------------");
 
