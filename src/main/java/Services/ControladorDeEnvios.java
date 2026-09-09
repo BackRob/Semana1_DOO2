@@ -6,7 +6,7 @@ import model.Repartidor;
 
 import java.util.ArrayList;
 
-public class ControladorDeEnvios  {
+public class ControladorDeEnvios implements Runnable  {
     //atributos
     private static ControladorDeEnvios instancia;
     private final ArrayList<Despachable> listaDespachable;
@@ -26,12 +26,20 @@ public class ControladorDeEnvios  {
         return instancia;
     }
 
+
+    @Override
+    public void run() {
+        while (true) {
+
+        }
+    }
+
+
+
     //gets
     public ArrayList<Despachable> getListaDespachable() {
         return new ArrayList<>(listaDespachable);
     }
-
-
 
     //agregar repartidor/// autoasignar
     public void agregarRepartidor(Repartidor repartidor) {
