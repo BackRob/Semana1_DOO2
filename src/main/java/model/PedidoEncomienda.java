@@ -4,8 +4,9 @@ import static Services.ControladorDeEnvios.getControladorEnvios;
 
 public class PedidoEncomienda extends Pedido {
 
-    public PedidoEncomienda(int idPedido, String direccionEntrega,double distanciaKm) {
-        super(idPedido, direccionEntrega, distanciaKm);
+    public PedidoEncomienda(String direccionEntrega,double distanciaKm) {
+        super(direccionEntrega, distanciaKm);
+        prioridadPedido = PrioridadPedido.BAJA;
     }
 
     @Override

@@ -6,8 +6,9 @@ import interfaces.Despachable;
 import static Services.ControladorDeEnvios.getControladorEnvios;
 
 public class PedidoComida extends Pedido {
-    public PedidoComida(int idPedido, String direccionEntrega,double distanciaKm) {
-        super(idPedido,direccionEntrega,distanciaKm);
+    public PedidoComida(String direccionEntrega,double distanciaKm) {
+        super(direccionEntrega,distanciaKm);
+        this.prioridadPedido = PrioridadPedido.MEDIA;
     }
 
 

@@ -2,12 +2,20 @@ package Services;
 
 
 import interfaces.Despachable;
+import model.Pedido;
 import model.Repartidor;
 
 import java.util.ArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.PriorityBlockingQueue;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class ControladorDeEnvios implements Runnable  {
     //atributos
+    private final ExecutorService executor;
+    private final PriorityBlockingQueue<Pedido> colaPedidos;
+    private static final AtomicInteger contadorGlobal = new AtomicInteger(1); // contador seguro para hilos
     private static ControladorDeEnvios instancia;
     private final ArrayList<Despachable> listaDespachable;
     private final ArrayList<Repartidor> listaRepartidor;
@@ -15,6 +23,8 @@ public class ControladorDeEnvios implements Runnable  {
 
 
     private ControladorDeEnvios() {// Constructor privado
+        executor = Executors.newCachedThreadPool();
+        colaPedidos = new PriorityBlockingQueue<>();
         listaDespachable = new ArrayList<>();
         listaRepartidor = new ArrayList<>();
     }
@@ -29,12 +39,46 @@ public class ControladorDeEnvios implements Runnable  {
 
     @Override
     public void run() {
+        Pedido pedidoRecorrido;
+        Repartidor repartidor;
+
+
         while (true) {
+            try {
+                pedidoRecorrido = colaPedidos.take();
+                synchronized (this) {
+                    while (true) {
+                        agregarYAsignarPedido(pedidoRecorrido);
+                        if (pedidoRecorrido.getRepartidor() != null) {
+                            System.out.println("cargando pedido:" + pedidoRecorrido.getIdPedido() + "recorrido...");
+                            break;
+                        } else {
+
+                                wait();
+
+                        }
+                    }
+                }
+
+
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                break;
+            }
 
         }
     }
 
 
+
+
+    //Agregar a la cola
+    public void agregarALaCola(Pedido pedido) {
+        if (pedido != null) {
+            System.out.println("Encolando pedido " + pedido.getIdPedido());
+            colaPedidos.put(pedido);
+        }
+    }
 
     //gets
     public ArrayList<Despachable> getListaDespachable() {
@@ -51,8 +95,11 @@ public class ControladorDeEnvios implements Runnable  {
             System.out.println("ERROR al agregar repartidor con rut: "+repartidor.getRut()+" ya existe");
         }else {
             listaRepartidor.add(repartidor);
+            executor.submit(repartidor);
+
         }
     }
+
 
     //Agregar Pedido Despachable
     private boolean agregarPedido(Despachable pedido){
@@ -61,12 +108,13 @@ public class ControladorDeEnvios implements Runnable  {
             return false;
         }
         if (listaDespachable.contains(pedido)){
-            System.out.println("Pedido ya existe");
-            return false;
+            System.out.println("Pedido: "+pedido.getIdPedido()+" en historial");
+            return true;
+        }else {
+            listaDespachable.add(pedido);
+            System.out.println("Pedido agregado correctamente");
+            return true;
         }
-        listaDespachable.add(pedido);
-        System.out.println("Pedido agregado correctamente");
-        return true;
     }
 
     //Recorrer repartidores disponibles filtrando por mochila
@@ -90,6 +138,28 @@ public class ControladorDeEnvios implements Runnable  {
         return null;
     }
 
+    public boolean hayRepartidorLibre(){
+
+        for (Repartidor repartidor : listaRepartidor){
+
+            System.out.println(
+                    repartidor.getNombre()
+                            + " asignado="
+                            + repartidor.getAsignado()
+            );
+
+            if (!repartidor.estaDisponible()){
+                continue;
+            }
+
+            return true;
+        }
+
+        return false;
+    }
+
+
+
 
     //Agregar pedido y con asignacion manual
     public void agregarYAsignarPedido(Despachable pedido, String repartidor){
@@ -107,6 +177,7 @@ public class ControladorDeEnvios implements Runnable  {
     public void agregarYAsignarPedido(Despachable pedido){
         if (agregarPedido(pedido)) {
             pedido.asignarRepartidor();
+
         }
     }
 

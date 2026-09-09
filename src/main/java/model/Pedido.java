@@ -1,24 +1,26 @@
 package model;
 
-import Services.ControladorDeEnvios;
 import interfaces.Cancelable;
 import interfaces.Despachable;
 import interfaces.Rastreable;
 
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static Services.ControladorDeEnvios.getControladorEnvios;
 
-public abstract class Pedido implements Cancelable, Rastreable, Despachable {
-    private int idPedido;
+public abstract class Pedido implements Cancelable, Rastreable, Despachable, Comparable<Pedido> {
+    private static final AtomicInteger contadorGlobal = new AtomicInteger(1); // contador seguro para hilos
+    private final int idPedido;
     private String direccionEntrega;
     private double distanciaKm;
     private EstadoPedido estadoPedido;
     private Repartidor repartidor;
+    protected PrioridadPedido prioridadPedido;
 
     //constructor
-    public Pedido(int idPedido, String direccionEntrega, double distanciaKm) {
-        setIdPedido(idPedido);
+    public Pedido(String direccionEntrega, double distanciaKm) {
+        idPedido = contadorGlobal.getAndIncrement();
         setDireccionEntrega(direccionEntrega);
         setDistanciaKm(distanciaKm);
         estadoPedido = EstadoPedido.INICIADO;
@@ -31,20 +33,30 @@ public abstract class Pedido implements Cancelable, Rastreable, Despachable {
             this.direccionEntrega = direccionEntrega;
         }
     }
-    public void setIdPedido(int idPedido) {
-        if (idPedido > 0) {
-            this.idPedido = idPedido;
-        }
+
+    public PrioridadPedido getPrioridadPedido() {
+        return prioridadPedido;
     }
+
+    public void setPrioridadPedido(PrioridadPedido prioridadPedido) {
+        this.prioridadPedido = prioridadPedido;
+    }
+
     public void setDistanciaKm(double distanciaKm) {
         if (distanciaKm > 0) {
             this.distanciaKm = distanciaKm;
         }
     }
-    public void setEstado(EstadoPedido estadoPedido) {
+    public synchronized void setEstado(EstadoPedido estadoPedido) {
                 this.estadoPedido = estadoPedido;
     }
-    public void setRepartidor(Repartidor repartidor) {this.repartidor = repartidor;}
+    public void setRepartidor(Repartidor repartidor) {
+        if (repartidor==null){
+            System.out.println("Repartidor nulo");
+            return;
+        }
+        this.repartidor = repartidor;
+    }
 
     //gets
     public int getIdPedido() {
@@ -54,7 +66,7 @@ public abstract class Pedido implements Cancelable, Rastreable, Despachable {
         return direccionEntrega;
     }
     public double getDistanciaKm() {return distanciaKm;}
-    public String getEstado() {return estadoPedido.toString();}
+    public EstadoPedido getEstado() {return estadoPedido;}
     public Repartidor getRepartidor() {return repartidor;}
 
     //Reescritura del HashCode y equals
@@ -80,7 +92,7 @@ public abstract class Pedido implements Cancelable, Rastreable, Despachable {
             System.out.println("Pedido ya gestionado");
             return;
         }
-        getControladorEnvios().agregarYAsignarPedido(this);
+        //getControladorEnvios().agregarYAsignarPedido(this);
     }
     public void agregarGestor(String repartidor) {
         if (estadoPedido!=EstadoPedido.INICIADO) {
@@ -90,6 +102,10 @@ public abstract class Pedido implements Cancelable, Rastreable, Despachable {
         getControladorEnvios().agregarYAsignarPedido(this, repartidor);
     }
 
+    //metodo para agregar hilos a la lista
+    public void agregarHilos(){
+        getControladorEnvios().agregarALaCola(this);
+    }
 
 
     //metodo para asignar repartidor automaticamente
@@ -101,6 +117,7 @@ public abstract class Pedido implements Cancelable, Rastreable, Despachable {
         }
         this.repartidor = repartidorAsignado;
         this.setEstado(EstadoPedido.ASIGNADO);
+        repartidorAsignado.setPedido(this);
         System.out.println("Repartidor Asignado con exito!");
         System.out.println(repartidorAsignado);
         repartidorAsignado.setAsignado(true);
@@ -133,12 +150,30 @@ public abstract class Pedido implements Cancelable, Rastreable, Despachable {
     }
 
     //Implementacion Interfases
+
+    //estados pedido
     @Override
-    public void cancelar() {
-        this.setEstado(EstadoPedido.CANCELADO);
-        this.getRepartidor().setAsignado(false);
-        this.setRepartidor(null);
-        System.out.println("Pedido Cancelado");
+    public synchronized void cancelar() {
+        if (estadoPedido!=EstadoPedido.ENTREGADO) {
+            this.setEstado(EstadoPedido.CANCELADO);
+            if (repartidor==null){
+                System.out.println("Repartidor nulo");
+                return;
+            }
+            repartidor.entregaCancelada();
+            repartidor = null;
+            System.out.println("Pedido Cancelado");
+        }else{
+            System.out.println("Pedido ya fue entregado, no se puede cancelar");
+        }
+
+    }
+
+    public synchronized void entregar(){
+        if (estadoPedido==EstadoPedido.ASIGNADO && repartidor!=null) {
+            estadoPedido = EstadoPedido.ENTREGADO;
+            repartidor.setAsignado(false);
+        }
     }
 
     @Override
@@ -151,8 +186,7 @@ public abstract class Pedido implements Cancelable, Rastreable, Despachable {
         }else{
             System.out.println("Pedido no asignado");
             System.out.println("Asignando...");
-            getControladorEnvios().agregarYAsignarPedido(this);
-            despachar();
+            getControladorEnvios().agregarALaCola(this);
         }
 
     }
@@ -165,6 +199,10 @@ public abstract class Pedido implements Cancelable, Rastreable, Despachable {
                 System.out.println(pedido);
             }
         }
+    }
+
+    public int compareTo(Pedido otro){
+        return this.prioridadPedido.compareTo(otro.prioridadPedido);
     }
 
 }
