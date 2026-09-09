@@ -32,6 +32,11 @@ public class Repartidor extends Persona {
     }
 
 
+    //poo
+    public boolean estaDisponible(){
+        return !getAsignado();
+    }
+
     @Override
     public String toString() {
         if (mochilaTermica) {

@@ -35,6 +35,10 @@ public class ControladorDeEnvios  {
 
     //agregar repartidor/// autoasignar
     public void agregarRepartidor(Repartidor repartidor) {
+        if(repartidor == null){
+            System.out.println("Repartidor nulo");
+            return;
+        }
         if (listaRepartidor.contains(repartidor)) {
             System.out.println("ERROR al agregar repartidor con rut: "+repartidor.getRut()+" ya existe");
         }else {
@@ -43,13 +47,18 @@ public class ControladorDeEnvios  {
     }
 
     //Agregar Pedido Despachable
-    private void agregarPedido(Despachable pedido){
+    private boolean agregarPedido(Despachable pedido){
+        if (pedido == null) {
+            System.out.println("Pedido Nulo");
+            return false;
+        }
         if (listaDespachable.contains(pedido)){
             System.out.println("Pedido ya existe");
-            return;
+            return false;
         }
         listaDespachable.add(pedido);
         System.out.println("Pedido agregado correctamente");
+        return true;
     }
 
     //Recorrer repartidores disponibles filtrando por mochila
@@ -59,7 +68,7 @@ public class ControladorDeEnvios  {
             System.out.println("Validando mochila termica...");
         }
         for (Repartidor repartidor : listaRepartidor){
-            if (repartidor.getAsignado()){
+            if (!repartidor.estaDisponible()){
                 continue;
             }
             if(requiereMochilaTermica){
@@ -76,14 +85,21 @@ public class ControladorDeEnvios  {
 
     //Agregar pedido y con asignacion manual
     public void agregarYAsignarPedido(Despachable pedido, String repartidor){
-        agregarPedido(pedido);
+        if (repartidor == null) {
+            System.out.println("Repartidor Nulo");
+            return;
+        }
+
+        if (agregarPedido(pedido)) {
             pedido.asignarRepartidor(repartidor);
+        }
     }
 
     //Agregar pedido y con asignacion automatica
     public void agregarYAsignarPedido(Despachable pedido){
-        agregarPedido(pedido);
+        if (agregarPedido(pedido)) {
             pedido.asignarRepartidor();
+        }
     }
 
 
