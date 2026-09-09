@@ -9,8 +9,8 @@ import java.util.ArrayList;
 public class ControladorDeEnvios  {
     //atributos
     private static ControladorDeEnvios instancia;
-    private static ArrayList<Despachable> listaDespachable;
-    private static ArrayList<Repartidor> listaRepartidor;
+    private final ArrayList<Despachable> listaDespachable;
+    private final ArrayList<Repartidor> listaRepartidor;
 
 
 
@@ -33,12 +33,8 @@ public class ControladorDeEnvios  {
 
 
 
-    //agregar repartidor
+    //agregar repartidor/// autoasignar
     public void agregarRepartidor(Repartidor repartidor) {
-        if(repartidor == null){
-            System.out.println("Repartidor nulo");
-            return;
-        }
         if (listaRepartidor.contains(repartidor)) {
             System.out.println("ERROR al agregar repartidor con rut: "+repartidor.getRut()+" ya existe");
         }else {
@@ -48,10 +44,6 @@ public class ControladorDeEnvios  {
 
     //Agregar Pedido Despachable
     private void agregarPedido(Despachable pedido){
-        if (pedido == null) {
-            System.out.println("Pedido Nulo");
-            return;
-        }
         if (listaDespachable.contains(pedido)){
             System.out.println("Pedido ya existe");
             return;

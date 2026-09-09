@@ -2,6 +2,7 @@ package model;
 
 import java.time.LocalDate;
 
+import static Services.ControladorDeEnvios.getControladorEnvios;
 
 
 public class Repartidor extends Persona {
@@ -23,6 +24,12 @@ public class Repartidor extends Persona {
 
     public void setAsignado(boolean asignado) {this.asignado = asignado;}
     public boolean getAsignado() {return asignado;}
+
+
+    //AutoAsignacion
+    public void agregarControlador(){
+        getControladorEnvios().agregarRepartidor(this);
+    }
 
 
     @Override
