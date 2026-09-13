@@ -25,6 +25,7 @@ public abstract class Pedido implements Cancelable, Rastreable, Despachable, Com
         setDistanciaKm(distanciaKm);
         estadoPedido = EstadoPedido.INICIADO;
         repartidor = null;
+        this.agregarPedidoGestor();
     }
 
     //sets
@@ -80,53 +81,10 @@ public abstract class Pedido implements Cancelable, Rastreable, Despachable, Com
         return Objects.hashCode(idPedido);
     }
 
-
-    //metodo para asignar, dependiendo el tipo de pedido
-    public abstract void asignarRepartidor();
-
-
-
-    //Agregar utilizando poliformismo
-    public void agregarGestor() {
-        if (estadoPedido!=EstadoPedido.INICIADO) {
-            System.out.println("Pedido ya gestionado");
-            return;
-        }
-        //getControladorEnvios().agregarYAsignarPedido(this);
-    }
-    public void agregarGestor(String repartidor) {
-        if (estadoPedido!=EstadoPedido.INICIADO) {
-            System.out.println("Pedido ya gestionado");
-            return;
-        }
-        getControladorEnvios().agregarYAsignarPedido(this, repartidor);
+    public void agregarPedidoGestor(){
+        getControladorEnvios().agregarPedido(this);
     }
 
-    //metodo para agregar hilos a la lista
-    public void agregarHilos(){
-        getControladorEnvios().agregarALaCola(this);
-    }
-
-
-    //metodo para asignar repartidor automaticamente
-    public void asignarRepartidorAutomatico(boolean requiereMochilaTermica){
-        Repartidor repartidorAsignado = getControladorEnvios().buscarRepartidorLibre(requiereMochilaTermica);
-        if(repartidorAsignado == null){
-            System.out.println("No se encontro repartidor disponible");
-            return;
-        }
-        this.repartidor = repartidorAsignado;
-        this.setEstado(EstadoPedido.ASIGNADO);
-        repartidorAsignado.setPedido(this);
-        System.out.println("Repartidor Asignado con exito!");
-        System.out.println(repartidorAsignado);
-        repartidorAsignado.setAsignado(true);
-        System.out.println(this);
-    }
-    //metodo para asignar repartidor Manualmente
-    public void asignarRepartidor(String nombreRepartidor) {
-        System.out.println("Repartidor esta siendo asignado...");
-    }
 
 
     //metodos solicitados
@@ -176,33 +134,12 @@ public abstract class Pedido implements Cancelable, Rastreable, Despachable, Com
         }
     }
 
-    @Override
-    public void despachar() {
-        System.out.println("Despachando Pedido #" +idPedido+ "...");
-        if(this.getRepartidor() != null){
-            System.out.println("Tiempo estimado de entrega: "+calcularTiempoEntrega()+" minutos");
-            System.out.println("Pedido #" +idPedido+ " despachado!\n");
-            this.setEstado(EstadoPedido.DESPACHADO);
-        }else{
-            System.out.println("Pedido no asignado");
-            System.out.println("Asignando...");
-            getControladorEnvios().agregarALaCola(this);
-        }
-
-    }
-
-    @Override
-    public void verHistorial() {
-        getControladorEnvios();
-        for (Despachable pedido : getControladorEnvios().getListaDespachable()) {
-            if (pedido.getClass() == this.getClass()) {
-                System.out.println(pedido);
-            }
-        }
-    }
+    public abstract boolean necesitaMochila();
 
     public int compareTo(Pedido otro){
         return this.prioridadPedido.compareTo(otro.prioridadPedido);
     }
+
+
 
 }

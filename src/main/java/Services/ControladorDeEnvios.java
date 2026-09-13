@@ -1,66 +1,115 @@
 package Services;
 
 
-import interfaces.Despachable;
+
 import model.Pedido;
 import model.Repartidor;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class ControladorDeEnvios implements Runnable  {
     //atributos
     private final ExecutorService executor;
-    private final PriorityBlockingQueue<Pedido> colaPedidos;
-    private static final AtomicInteger contadorGlobal = new AtomicInteger(1); // contador seguro para hilos
+    private final List<Repartidor> listaRepartidor;
+    private final BlockingQueue<Pedido> pedidos;
+    private final AtomicInteger contadorPedidos = new AtomicInteger(0); // contador seguro para hilos
+    private final AtomicInteger contadorPedidosEntregados = new AtomicInteger(0); // contador seguro para hilos
     private static ControladorDeEnvios instancia;
-    private final ArrayList<Despachable> listaDespachable;
-    private final ArrayList<Repartidor> listaRepartidor;
-
 
 
     private ControladorDeEnvios() {// Constructor privado
         executor = Executors.newCachedThreadPool();
-        colaPedidos = new PriorityBlockingQueue<>();
-        listaDespachable = new ArrayList<>();
-        listaRepartidor = new ArrayList<>();
+        listaRepartidor = Collections.synchronizedList(new ArrayList<>());
+        pedidos = new LinkedBlockingQueue<>();
     }
     //singleton
-    public static ControladorDeEnvios getControladorEnvios() {
+    public synchronized static ControladorDeEnvios getControladorEnvios() {
         if (instancia == null) {
             instancia = new ControladorDeEnvios();
+            instancia.executor.submit(instancia);
         }
         return instancia;
     }
 
 
+    //Agregar repartidor lista global (synchronized pensando en futuro hilo creador de repartidor)
+    public synchronized void agregarRepartidor(Repartidor repartidor){
+        listaRepartidor.add(repartidor);
+        executor.submit(repartidor);
+    }
+    //AGREGAR PEDIDO
+    public void agregarPedido(Pedido pedido) {
+        pedidos.offer(pedido);
+        contadorPedidos.incrementAndGet();
+    }
+
+
+    //recorrer repartidores para asignar parejos repartir parejo
+    public synchronized Repartidor asignarRepartidorMenosPedidos(Pedido pedido) {
+        Repartidor repartidorMenor = primerRepartidorAsignable(pedido);
+        if (repartidorMenor == null) {
+            System.out.println("NO hay repartidor registrado para repartir dicho pedido");
+            return null;
+        }
+        for (Repartidor repartidor : listaRepartidor) {
+            if (repartidor.sePuedeRepartir(pedido)&&repartidorMenor.getContadorpedidos()>repartidor.getContadorpedidos()){
+                repartidorMenor = repartidor;
+            }
+        }
+        return repartidorMenor;
+    }
+
+    //Obtener el primero que si se pueda asinar
+    public Repartidor primerRepartidorAsignable(Pedido pedido) {
+        for (Repartidor repartidor : listaRepartidor) {
+            if (repartidor.sePuedeRepartir(pedido)) {
+                return repartidor;
+            }
+        }
+        return null;
+    }
+
+    public synchronized void sumarContadorAtomico(){
+        contadorPedidosEntregados.incrementAndGet();
+        System.out.println("Contador Pedidos Entregados: "+contadorPedidosEntregados.get());
+        System.out.println("Contador Pedidos: "+contadorPedidos.get());
+        if (contadorPedidos.get()>0 && contadorPedidosEntregados.get() == contadorPedidos.get()) {
+            System.out.println("Todos Los pedidos Entregados");
+            executor.shutdownNow();
+        }
+    }
+
+
+
     @Override
     public void run() {
-        Pedido pedidoRecorrido;
-        Repartidor repartidor;
-
-
+        synchronized (this) {
+            if (listaRepartidor.isEmpty()){
+                try {
+                    wait();
+                    Thread.sleep(5000);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+        }
         while (true) {
             try {
-                pedidoRecorrido = colaPedidos.take();
-                synchronized (this) {
-                    while (true) {
-                        agregarYAsignarPedido(pedidoRecorrido);
-                        if (pedidoRecorrido.getRepartidor() != null) {
-                            System.out.println("cargando pedido:" + pedidoRecorrido.getIdPedido() + "recorrido...");
-                            break;
-                        } else {
-
-                                wait();
-
-                        }
-                    }
+                Pedido pedido = pedidos.take();
+                Repartidor repartidor = asignarRepartidorMenosPedidos(pedido);
+                if (repartidor != null) {
+                    repartidor.agregarPedido(pedido);
+                    System.out.println("Pedido Assignado al Repartidor: "+repartidor.getNombre());
+                }else{
+                    System.out.println("No hay repartidor valido para asignar pedido, pedido cancelado");
                 }
-
-
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 break;
@@ -68,118 +117,4 @@ public class ControladorDeEnvios implements Runnable  {
 
         }
     }
-
-
-
-
-    //Agregar a la cola
-    public void agregarALaCola(Pedido pedido) {
-        if (pedido != null) {
-            System.out.println("Encolando pedido " + pedido.getIdPedido());
-            colaPedidos.put(pedido);
-        }
-    }
-
-    //gets
-    public ArrayList<Despachable> getListaDespachable() {
-        return new ArrayList<>(listaDespachable);
-    }
-
-    //agregar repartidor/// autoasignar
-    public void agregarRepartidor(Repartidor repartidor) {
-        if(repartidor == null){
-            System.out.println("Repartidor nulo");
-            return;
-        }
-        if (listaRepartidor.contains(repartidor)) {
-            System.out.println("ERROR al agregar repartidor con rut: "+repartidor.getRut()+" ya existe");
-        }else {
-            listaRepartidor.add(repartidor);
-            executor.submit(repartidor);
-
-        }
-    }
-
-
-    //Agregar Pedido Despachable
-    private boolean agregarPedido(Despachable pedido){
-        if (pedido == null) {
-            System.out.println("Pedido Nulo");
-            return false;
-        }
-        if (listaDespachable.contains(pedido)){
-            System.out.println("Pedido: "+pedido.getIdPedido()+" en historial");
-            return true;
-        }else {
-            listaDespachable.add(pedido);
-            System.out.println("Pedido agregado correctamente");
-            return true;
-        }
-    }
-
-    //Recorrer repartidores disponibles filtrando por mochila
-    public Repartidor buscarRepartidorLibre(boolean requiereMochilaTermica){
-
-        if (requiereMochilaTermica){
-            System.out.println("Validando mochila termica...");
-        }
-        for (Repartidor repartidor : listaRepartidor){
-            if (!repartidor.estaDisponible()){
-                continue;
-            }
-            if(requiereMochilaTermica){
-                if (repartidor.getMochilaTermica()){
-                    return repartidor;
-                }
-            }else{
-                return  repartidor;
-            }
-        }
-        return null;
-    }
-
-    public boolean hayRepartidorLibre(){
-
-        for (Repartidor repartidor : listaRepartidor){
-
-            System.out.println(
-                    repartidor.getNombre()
-                            + " asignado="
-                            + repartidor.getAsignado()
-            );
-
-            if (!repartidor.estaDisponible()){
-                continue;
-            }
-
-            return true;
-        }
-
-        return false;
-    }
-
-
-
-
-    //Agregar pedido y con asignacion manual
-    public void agregarYAsignarPedido(Despachable pedido, String repartidor){
-        if (repartidor == null) {
-            System.out.println("Repartidor Nulo");
-            return;
-        }
-
-        if (agregarPedido(pedido)) {
-            pedido.asignarRepartidor(repartidor);
-        }
-    }
-
-    //Agregar pedido y con asignacion automatica
-    public void agregarYAsignarPedido(Despachable pedido){
-        if (agregarPedido(pedido)) {
-            pedido.asignarRepartidor();
-
-        }
-    }
-
-
 }

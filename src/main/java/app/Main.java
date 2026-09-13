@@ -14,7 +14,12 @@ public class Main {
 
         //singleton
         ControladorDeEnvios controladorEnvios = ControladorDeEnvios.getControladorEnvios();
-        new Thread(controladorEnvios).start();
+
+        //Repartidores
+        Repartidor r1 = new Repartidor("Juan Pérez",LocalDate.of(1995,5,12),"12.345.678-9", false);
+        Repartidor r2 = new Repartidor("María González",LocalDate.of(1998,11,3),"18.765.432-1", false);
+        Repartidor r3 = new Repartidor("Carlos Soto",LocalDate.of(1992,7,20),"15.987.654-3",true);
+        Repartidor r4 = new Repartidor("Carlos roberto",LocalDate.of(1992,7,20),"15.987.654-3",false);
 
         //Pedidos
         // PedidoComida
@@ -53,52 +58,15 @@ public class Main {
         PedidoExpress px9 = new PedidoExpress("Av. Grecia #1800", 9);
         PedidoExpress px10 = new PedidoExpress("Macul #808", 5);
 
-        //Repartidores
-        Repartidor r1 = new Repartidor("Juan Pérez",LocalDate.of(1995,5,12),"12.345.678-9", false);
-        Repartidor r2 = new Repartidor("María González",LocalDate.of(1998,11,3),"18.765.432-1", false);
-        Repartidor r3 = new Repartidor("Carlos Soto",LocalDate.of(1992,7,20),"15.987.654-3",true);
-        Repartidor r4 = new Repartidor("Carlos roberto",LocalDate.of(1992,7,20),"15.987.654-3",false);
 
-        //agregar repartidores
-        r1.agregarALaCola();
-        r2.agregarALaCola();
-        r3.agregarALaCola();
-        r4.agregarALaCola();
-
-        //Agregamos a la lista
-        pc1.agregarHilos();
-        pc2.agregarHilos();
-        pc3.agregarHilos();
-        pc4.agregarHilos();
-        pc5.agregarHilos();
-        pc6.agregarHilos();
-        pc7.agregarHilos();
-        pc8.agregarHilos();
-        pc9.agregarHilos();
-        pc10.agregarHilos();
-
-        pe1.agregarHilos();
-        pe2.agregarHilos();
-        pe3.agregarHilos();
-        pe4.agregarHilos();
-        pe5.agregarHilos();
-        pe6.agregarHilos();
-        pe7.agregarHilos();
-        pe8.agregarHilos();
-        pe9.agregarHilos();
-        pe10.agregarHilos();
-
-        px1.agregarHilos();
-        px2.agregarHilos();
-        px3.agregarHilos();
-        px4.agregarHilos();
-        px5.agregarHilos();
-        px6.agregarHilos();
-        px7.agregarHilos();
-        px8.agregarHilos();
-        px9.agregarHilos();
-        px10.agregarHilos();
-
-
+        try {
+            Thread.sleep(3000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        System.out.println("Verificar asignacion de pedidos bien r1:"+r1.getContadorpedidos());
+        System.out.println("Verificar asignacion de pedidos bien r2:"+r2.getContadorpedidos());
+        System.out.println("Verificar asignacion de pedidos bien r3:"+r3.getContadorpedidos());
+        System.out.println("Verificar asignacion de pedidos bien r4:"+r4.getContadorpedidos());
     }
 }
