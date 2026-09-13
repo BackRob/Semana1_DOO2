@@ -36,12 +36,12 @@ public class Repartidor extends Persona implements Runnable {
                 setPedidoActual(pedidos.take());
                 System.out.println("Entregando pedido: "+pedidoActual+ "Por: "+getNombre());
                 Thread.sleep(tiempoAleatorio());
-                System.out.println("Repartidor " +getNombre()+" llegara en: "+pedidoActual.calcularTiempoEntrega());
+                System.out.println("Repartidor " +getNombre()+" llegara en: "+pedidoActual.calcularTiempoEntrega()+"min.");
                 System.out.println();
                 Thread.sleep(tiempoAleatorio());
                 System.out.println("Repartidor " +getNombre()+" en punto de destino");
                 Thread.sleep(tiempoAleatorio());
-                System.out.println("Entregando paquete Numero" + pedidoActual.getIdPedido()+"...");
+                System.out.println("Entregando paquete Numero " + pedidoActual.getIdPedido()+"...");
                 Thread.sleep(tiempoAleatorio());
                 System.out.println("Paquete Numero " + pedidoActual.getIdPedido()+" entregado");
                 entregarPedido();

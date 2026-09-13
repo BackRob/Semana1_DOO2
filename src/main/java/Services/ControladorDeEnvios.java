@@ -78,8 +78,8 @@ public class ControladorDeEnvios implements Runnable  {
 
     public synchronized void sumarContadorAtomico(){
         contadorPedidosEntregados.incrementAndGet();
-        System.out.println("Contador Pedidos Entregados: "+contadorPedidosEntregados.get());
-        System.out.println("Contador Pedidos: "+contadorPedidos.get());
+        System.out.println("--Contador Pedidos Entregados: "+contadorPedidosEntregados.get()+"--");
+        System.out.println("--Contador Pedidos: "+contadorPedidos.get()+"--");
         if (contadorPedidos.get()>0 && contadorPedidosEntregados.get() == contadorPedidos.get()) {
             System.out.println("Todos Los pedidos Entregados");
             executor.shutdownNow();
@@ -94,7 +94,7 @@ public class ControladorDeEnvios implements Runnable  {
             if (listaRepartidor.isEmpty()){
                 try {
                     wait();
-                    Thread.sleep(5000);
+                    Thread.sleep(2000);
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                 }
