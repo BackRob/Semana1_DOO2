@@ -7,25 +7,19 @@ import interfaces.Rastreable;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static Services.ControladorDeEnvios.getControladorEnvios;
-
-public abstract class Pedido implements Cancelable, Rastreable, Despachable, Comparable<Pedido> {
+public abstract class Pedido implements Cancelable, Despachable, Rastreable {
     private static final AtomicInteger contadorGlobal = new AtomicInteger(1); // contador seguro para hilos
     private final int idPedido;
     private String direccionEntrega;
     private double distanciaKm;
     private EstadoPedido estadoPedido;
-    private Repartidor repartidor;
-    protected PrioridadPedido prioridadPedido;
 
     //constructor
     public Pedido(String direccionEntrega, double distanciaKm) {
         idPedido = contadorGlobal.getAndIncrement();
         setDireccionEntrega(direccionEntrega);
         setDistanciaKm(distanciaKm);
-        estadoPedido = EstadoPedido.INICIADO;
-        repartidor = null;
-        this.agregarPedidoGestor();
+        estadoPedido = EstadoPedido.PENDIENTE;
     }
 
     //sets
@@ -35,28 +29,24 @@ public abstract class Pedido implements Cancelable, Rastreable, Despachable, Com
         }
     }
 
-    public PrioridadPedido getPrioridadPedido() {
-        return prioridadPedido;
-    }
-
-    public void setPrioridadPedido(PrioridadPedido prioridadPedido) {
-        this.prioridadPedido = prioridadPedido;
-    }
-
     public void setDistanciaKm(double distanciaKm) {
         if (distanciaKm > 0) {
             this.distanciaKm = distanciaKm;
         }
     }
+
     public synchronized void setEstado(EstadoPedido estadoPedido) {
-                this.estadoPedido = estadoPedido;
+        this.estadoPedido = estadoPedido;
     }
-    public void setRepartidor(Repartidor repartidor) {
-        if (repartidor==null){
-            System.out.println("Repartidor nulo");
-            return;
+
+    //metodo pedido por la pauta, actualiza el estado recibiendo un String
+    public synchronized void setEstado(String estado) {
+        if (estado == null) return;
+        try {
+            this.estadoPedido = EstadoPedido.valueOf(estado.trim().toUpperCase());
+        } catch (IllegalArgumentException e) {
+            System.out.println("Estado invalido para el pedido " + idPedido + ": " + estado);
         }
-        this.repartidor = repartidor;
     }
 
     //gets
@@ -67,8 +57,7 @@ public abstract class Pedido implements Cancelable, Rastreable, Despachable, Com
         return direccionEntrega;
     }
     public double getDistanciaKm() {return distanciaKm;}
-    public EstadoPedido getEstado() {return estadoPedido;}
-    public Repartidor getRepartidor() {return repartidor;}
+    public synchronized EstadoPedido getEstado() {return estadoPedido;}
 
     //Reescritura del HashCode y equals
     @Override
@@ -81,65 +70,27 @@ public abstract class Pedido implements Cancelable, Rastreable, Despachable, Com
         return Objects.hashCode(idPedido);
     }
 
-    public void agregarPedidoGestor(){
-        getControladorEnvios().agregarPedido(this);
-    }
-
-
-
-    //metodos solicitados
-    public void mostrarResumen(){
-
-        System.out.println("Direccion: " + getDireccionEntrega());
-        System.out.println("Distancia: " + getDistanciaKm());
-    }
     public abstract double calcularTiempoEntrega();
 
     //METODO ToString
     @Override
-    public String toString() {
+    public synchronized String toString() {
         return "Pedido{" +
                 "idPedido=" + idPedido +
                 ", direccionEntrega='" + direccionEntrega + '\'' +
                 ", distanciaKm=" + distanciaKm +
-                ", estado='" + estadoPedido+ '\'' +
-                ", repartidor=" + (repartidor != null ? repartidor.getNombre() : "Sin asignar") +
+                ", estado='" + estadoPedido + '\'' +
                 '}';
     }
 
     //Implementacion Interfases
-
-    //estados pedido
     @Override
     public synchronized void cancelar() {
-        if (estadoPedido!=EstadoPedido.ENTREGADO) {
-            this.setEstado(EstadoPedido.CANCELADO);
-            if (repartidor==null){
-                System.out.println("Repartidor nulo");
-                return;
-            }
-            repartidor.entregaCancelada();
-            repartidor = null;
+        if (estadoPedido != EstadoPedido.ENTREGADO) {
+            estadoPedido = EstadoPedido.CANCELADO;
             System.out.println("Pedido Cancelado");
-        }else{
+        } else {
             System.out.println("Pedido ya fue entregado, no se puede cancelar");
         }
-
     }
-
-    public synchronized void entregar(){
-        if (estadoPedido==EstadoPedido.ASIGNADO && repartidor!=null) {
-            estadoPedido = EstadoPedido.ENTREGADO;
-            repartidor.setAsignado(false);
-        }
-    }
-
-    public abstract boolean necesitaMochila();
-
-    public int compareTo(Pedido otro){
-        return this.prioridadPedido.compareTo(otro.prioridadPedido);
-    }
-
-
-
 }

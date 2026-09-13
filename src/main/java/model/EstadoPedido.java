@@ -1,9 +1,8 @@
 package model;
 
 public enum EstadoPedido {
-    INICIADO,
-    ASIGNADO,
-    DESPACHADO,
+    PENDIENTE,
+    EN_REPARTO,
     ENTREGADO,
     CANCELADO;
 }

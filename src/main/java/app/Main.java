@@ -1,25 +1,29 @@
 package app;
 
-import Services.ControladorDeEnvios;
+import model.Pedido;
 import model.PedidoComida;
 import model.PedidoEncomienda;
 import model.PedidoExpress;
 import model.Repartidor;
+import model.ZonaDeCarga;
 
 import java.time.LocalDate;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class Main {
 
     public static void main(String[] args) {
 
-        //singleton
-        ControladorDeEnvios controladorEnvios = ControladorDeEnvios.getControladorEnvios();
+        //zona de carga
+        ZonaDeCarga zonaDeCarga = new ZonaDeCarga();
 
         //Repartidores
-        Repartidor r1 = new Repartidor("Juan Pérez",LocalDate.of(1995,5,12),"12.345.678-9", false);
-        Repartidor r2 = new Repartidor("María González",LocalDate.of(1998,11,3),"18.765.432-1", false);
-        Repartidor r3 = new Repartidor("Carlos Soto",LocalDate.of(1992,7,20),"15.987.654-3",true);
-        Repartidor r4 = new Repartidor("Carlos roberto",LocalDate.of(1992,7,20),"15.987.654-3",false);
+        Repartidor r1 = new Repartidor("Juan Pérez",LocalDate.of(1995,5,12),"12.345.678-9", zonaDeCarga);
+        Repartidor r2 = new Repartidor("María González",LocalDate.of(1998,11,3),"18.765.432-1", zonaDeCarga);
+        Repartidor r3 = new Repartidor("Carlos Soto",LocalDate.of(1992,7,20),"15.987.654-3", zonaDeCarga);
+        Repartidor r4 = new Repartidor("Carlos roberto",LocalDate.of(1992,7,20),"15.987.654-3", zonaDeCarga);
 
         //Pedidos
         // PedidoComida
@@ -58,12 +62,31 @@ public class Main {
         PedidoExpress px9 = new PedidoExpress("Av. Grecia #1800", 9);
         PedidoExpress px10 = new PedidoExpress("Macul #808", 5);
 
+        Pedido[] pedidos = {
+                pc1, pc2, pc3, pc4, pc5, pc6, pc7, pc8, pc9, pc10,
+                pe1, pe2, pe3, pe4, pe5, pe6, pe7, pe8, pe9, pe10,
+                px1, px2, px3, px4, px5, px6, px7, px8, px9, px10
+        };
+        for (Pedido pedido : pedidos) {
+            zonaDeCarga.agregarPedido(pedido);
+        }
 
+        //hilos de los repartidores
+        ExecutorService executor = Executors.newFixedThreadPool(4);
+        executor.submit(r1);
+        executor.submit(r2);
+        executor.submit(r3);
+        executor.submit(r4);
+
+        executor.shutdown();
         try {
-            Thread.sleep(3000);
+            while (!executor.awaitTermination(1, TimeUnit.MINUTES)) {
+                //sigue esperando hasta que los repartidores terminen
+            }
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
+
         System.out.println("Verificar asignacion de pedidos bien r1:"+r1.getContadorpedidos());
         System.out.println("Verificar asignacion de pedidos bien r2:"+r2.getContadorpedidos());
         System.out.println("Verificar asignacion de pedidos bien r3:"+r3.getContadorpedidos());
