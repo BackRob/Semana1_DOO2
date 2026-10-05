@@ -3,6 +3,7 @@ package model;
 import dao.EntregaDAO;
 import dao.PedidoDAO;
 
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.concurrent.ThreadLocalRandom;
@@ -18,7 +19,7 @@ public class Repartidor extends Persona implements Runnable {
         contadorpedidos = 0;
     }
 
-    //constructor semana 7, para los repartidores que vienen de la base de datos (solo id y nombre)
+    //constructor para los repartidores que vienen de la base de datos (solo id y nombre)
     public Repartidor(int id, String nombre) {
         super(nombre, null, null);
         this.id = id;
@@ -35,8 +36,8 @@ public class Repartidor extends Persona implements Runnable {
             try {
                 pedido.setEstado(EstadoPedido.EN_REPARTO);
                 //se registra la entrega en la BD y se actualiza el estado del pedido
-                entregaDAO.guardar(new Entrega(pedido.getIdPedido(), id, LocalDate.now(), LocalTime.now()));
-                pedidoDAO.actualizarEstado(pedido.getIdPedido(), EstadoPedido.EN_REPARTO);
+                entregaDAO.create(new Entrega(pedido.getIdPedido(), id, LocalDate.now(), LocalTime.now()));
+                pedidoDAO.updateEstado(pedido.getIdPedido(), EstadoPedido.EN_REPARTO);
                 System.out.println("Entregando pedido: " + pedido + " Por: " + getNombre());
                 Thread.sleep(tiempoAleatorio());
                 System.out.println("Repartidor " + getNombre() + " llegara en: " + pedido.calcularTiempoEntrega() + "min.");
@@ -47,9 +48,12 @@ public class Repartidor extends Persona implements Runnable {
                 System.out.println("Entregando paquete Numero " + pedido.getIdPedido() + "...");
                 Thread.sleep(tiempoAleatorio());
                 pedido.setEstado(EstadoPedido.ENTREGADO);
-                pedidoDAO.actualizarEstado(pedido.getIdPedido(), EstadoPedido.ENTREGADO);
+                pedidoDAO.updateEstado(pedido.getIdPedido(), EstadoPedido.ENTREGADO);
                 contadorpedidos++;
                 System.out.println("Paquete Numero " + pedido.getIdPedido() + " entregado");
+            } catch (SQLException e) {
+                //si falla la BD con un pedido, se avisa por consola y sigue con el siguiente
+                System.out.println("Error con el pedido " + pedido.getIdPedido() + ": " + e.getMessage());
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 System.out.println(getNombre() + " finaliza su jornada.");

@@ -22,6 +22,13 @@ public class ZonaDeCarga {
         System.out.println("Pedido " + pedido.getIdPedido() + " ingresado a la zona de carga.");
     }
 
+    //semana 8: vacia la cola y la vuelve a llenar con los pedidos PENDIENTE de la BD
+    //asi no quedan pedidos que se editaron o eliminaron desde la ventana de pedidos
+    public synchronized void recargar(List<Pedido> pendientes) {
+        pedidosPendientes.clear();
+        pedidosPendientes.addAll(pendientes);
+    }
+
     public synchronized Pedido retirarPedido() {
         return pedidosPendientes.poll();
     }

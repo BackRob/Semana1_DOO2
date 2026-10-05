@@ -8,39 +8,68 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.sql.SQLException;
 
-//semana 7, formulario para guardar repartidores en la BD
+/**
+ * Semana 8: gestion de repartidores (agregar, listar, editar y eliminar).
+ * Se selecciona un repartidor en la tabla para editarlo o eliminarlo.
+ */
 public class VentanaRegistroRepartidor extends JFrame {
     private JPanel jPaneRepartidor;
     private JTextField jTextNombre;
     private JTable tablaRepartidores;
+    private JButton btnAgregar;
+    private JButton btnActualizar;
+    private JButton btnEliminar;
+    private JButton btnLimpiar;
     private JButton btnAtras;
-    private JButton btnRegistrar;
 
     private final DefaultTableModel modeloTabla;
     private final RepartidorDAO repartidorDAO = new RepartidorDAO();
 
     public VentanaRegistroRepartidor() throws HeadlessException {
-        setTitle("SpeedFast - Registrar Repartidor");
+        setTitle("SpeedFast - Repartidores");
         setContentPane(jPaneRepartidor);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         pack();
         setLocationRelativeTo(null);
 
-        //tabla con los repartidores que ya estan en la BD
-        modeloTabla = new DefaultTableModel(new String[]{"ID", "Nombre"}, 0) {
-            @Override
-            public boolean isCellEditable(int row, int column) {
-                return false;
-            }
-        };
+        modeloTabla = Tablas.modeloNoEditable(new String[]{"ID", "Nombre"});
         tablaRepartidores.setModel(modeloTabla);
-        cargarTabla();
+        tablaRepartidores.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
-        btnRegistrar.addActionListener(new ActionListener() {
+        //al seleccionar una fila se cargan sus datos en el formulario
+        tablaRepartidores.getSelectionModel().addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {
+                cargarSeleccion();
+            }
+        });
+
+        btnAgregar.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                registrarRepartidor();
+                agregar();
+            }
+        });
+
+        btnActualizar.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                actualizar();
+            }
+        });
+
+        btnEliminar.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                eliminar();
+            }
+        });
+
+        btnLimpiar.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                limpiar();
             }
         });
 
@@ -51,41 +80,120 @@ public class VentanaRegistroRepartidor extends JFrame {
             }
         });
 
-    }
-
-
-    public void registrarRepartidor() {
-        String nombre = jTextNombre.getText();
-        if (nombre == null || nombre.trim().isEmpty()) {
-            JOptionPane.showMessageDialog(this,
-                    "El campo Nombre no puede estar vacío.",
-                    "Error", JOptionPane.ERROR_MESSAGE);
-            jTextNombre.requestFocus();
-            return;
-        }
-
-        //el id lo pone la BD
-        Repartidor repartidor = new Repartidor(0, nombre.trim());
-        if (!repartidorDAO.guardar(repartidor)) {
-            JOptionPane.showMessageDialog(this,
-                    "No se pudo guardar el repartidor en la base de datos.\nRevisa que MySQL este encendido y los datos de ConexionBD.",
-                    "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-
-        JOptionPane.showMessageDialog(this,
-                "Repartidor " + repartidor.getNombre() + " registrado con ID " + repartidor.getId() + ".",
-                "Confirmacion", JOptionPane.INFORMATION_MESSAGE);
-        jTextNombre.setText("");
         cargarTabla();
     }
 
-    //usa listarTodos() del RepartidorDAO
+
+    //CREATE
+    public void agregar() {
+        String nombre = validarNombre();
+        if (nombre == null) {
+            return;
+        }
+        try {
+            Repartidor repartidor = new Repartidor(0, nombre);
+            repartidorDAO.create(repartidor);
+            Mensajes.exito(this, "Repartidor " + nombre + " registrado con ID " + repartidor.getId() + ".");
+            limpiar();
+            cargarTabla();
+        } catch (SQLException e) {
+            Mensajes.error(this, e.getMessage());
+        }
+    }
+
+    //UPDATE
+    public void actualizar() {
+        int id = idSeleccionado();
+        if (id == -1) {
+            return;
+        }
+        String nombre = validarNombre();
+        if (nombre == null) {
+            return;
+        }
+        try {
+            repartidorDAO.update(new Repartidor(id, nombre));
+            Mensajes.exito(this, "Repartidor " + id + " actualizado.");
+            limpiar();
+            cargarTabla();
+        } catch (SQLException e) {
+            Mensajes.error(this, e.getMessage());
+        }
+    }
+
+    //DELETE
+    public void eliminar() {
+        int id = idSeleccionado();
+        if (id == -1) {
+            return;
+        }
+        if (!Mensajes.confirmar(this, "¿Seguro que quieres eliminar el repartidor " + id + "?")) {
+            return;
+        }
+        try {
+            repartidorDAO.delete(id);
+            Mensajes.exito(this, "Repartidor " + id + " eliminado.");
+            limpiar();
+            cargarTabla();
+        } catch (SQLException e) {
+            Mensajes.error(this, e.getMessage());
+        }
+    }
+
+    //READ: llena la tabla con readAll()
     public void cargarTabla() {
         modeloTabla.setRowCount(0);
-        for (Repartidor repartidor : repartidorDAO.listarTodos()) {
-            modeloTabla.addRow(new Object[]{repartidor.getId(), repartidor.getNombre()});
+        try {
+            for (Repartidor repartidor : repartidorDAO.readAll()) {
+                modeloTabla.addRow(new Object[]{repartidor.getId(), repartidor.getNombre()});
+            }
+        } catch (SQLException e) {
+            Mensajes.error(this, e.getMessage());
         }
+    }
+
+    //validacion: obligatorio, maximo 100 caracteres (VARCHAR(100)) y solo letras
+    private String validarNombre() {
+        String nombre = jTextNombre.getText().trim();
+        if (nombre.isEmpty()) {
+            Mensajes.aviso(this, "El campo Nombre es obligatorio.");
+            jTextNombre.requestFocus();
+            return null;
+        }
+        if (nombre.length() > 100) {
+            Mensajes.aviso(this, "El nombre no puede tener mas de 100 caracteres.");
+            jTextNombre.requestFocus();
+            return null;
+        }
+        if (!nombre.matches("[\\p{L} .'-]+")) {
+            Mensajes.aviso(this, "El nombre solo puede tener letras y espacios.");
+            jTextNombre.requestFocus();
+            return null;
+        }
+        return nombre;
+    }
+
+    //devuelve el id de la fila seleccionada, o -1 si no hay ninguna
+    private int idSeleccionado() {
+        int fila = tablaRepartidores.getSelectedRow();
+        if (fila == -1) {
+            Mensajes.aviso(this, "Selecciona un repartidor en la tabla.");
+            return -1;
+        }
+        return (int) modeloTabla.getValueAt(fila, 0);
+    }
+
+    private void cargarSeleccion() {
+        int fila = tablaRepartidores.getSelectedRow();
+        if (fila != -1) {
+            jTextNombre.setText((String) modeloTabla.getValueAt(fila, 1));
+        }
+    }
+
+    private void limpiar() {
+        jTextNombre.setText("");
+        tablaRepartidores.clearSelection();
+        jTextNombre.requestFocus();
     }
 
 

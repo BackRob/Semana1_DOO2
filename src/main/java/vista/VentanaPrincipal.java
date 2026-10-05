@@ -11,6 +11,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.sql.SQLException;
 import java.util.List;
 
 
@@ -21,16 +22,17 @@ public class VentanaPrincipal extends JFrame{
     private JButton btnAsignarPedidos;
     private JButton btnListarPedidos;
     private JButton btnRegistrarRepartidor;
+    private JButton btnEntregas;
 
     public VentanaPrincipal() throws HeadlessException {
         setTitle("SpeedFast - Menu Principal");
         setContentPane(jInicio);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setSize(350, 280);
+        setSize(380, 330);
         setLocationRelativeTo(null);
         setResizable(false);
 
-        //abre el formulario de registro
+        //abre la gestion de pedidos (CRUD)
         btnRegistrarPedido.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -39,12 +41,21 @@ public class VentanaPrincipal extends JFrame{
             }
         });
 
-        //semana 7: formulario de repartidores
+        //abre la gestion de repartidores (CRUD)
         btnRegistrarRepartidor.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 VentanaRegistroRepartidor ventanaRepartidor = new VentanaRegistroRepartidor();
                 ventanaRepartidor.setVisible(true);
+            }
+        });
+
+        //semana 8: abre la gestion de entregas (CRUD)
+        btnEntregas.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                VentanaEntregas ventanaEntregas = new VentanaEntregas();
+                ventanaEntregas.setVisible(true);
             }
         });
 
@@ -57,7 +68,7 @@ public class VentanaPrincipal extends JFrame{
             }
         });
 
-        //asigna un repartidor y parte la entrega en un hilo
+        //simulacion de semana 5: asigna un repartidor y parte la entrega en un hilo
         btnAsignarPedidos.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -65,23 +76,22 @@ public class VentanaPrincipal extends JFrame{
             }
         });
 
-        cargarPendientesBD();
 
-    }
-
-
-    //al abrir la app, los pedidos PENDIENTE que quedaron en la BD vuelven a la zona de carga
-    public void cargarPendientesBD() {
-        PedidoDAO pedidoDAO = new PedidoDAO();
-        for (Pedido pedido : pedidoDAO.listarPorEstado(EstadoPedido.PENDIENTE)) {
-            ZonaDeCarga.getInstance().agregarPedido(pedido);
-        }
     }
 
 
     //elige un repartidor de la BD y lo pone a trabajar con los pedidos de la zona de carga
     public void asignarRepartidor() {
         ZonaDeCarga zonaDeCarga = ZonaDeCarga.getInstance();
+        List<Repartidor> repartidores;
+        try {
+            //semana 8: la zona de carga se llena con los pedidos PENDIENTE que hay en la BD
+            zonaDeCarga.recargar(new PedidoDAO().readByEstado(EstadoPedido.PENDIENTE));
+            repartidores = new RepartidorDAO().readAll();
+        } catch (SQLException e) {
+            Mensajes.error(this, e.getMessage());
+            return;
+        }
 
         if (zonaDeCarga.estaVacia()) {
             JOptionPane.showMessageDialog(this,
@@ -90,9 +100,6 @@ public class VentanaPrincipal extends JFrame{
             return;
         }
 
-        //semana 7: los repartidores salen de la base de datos
-        RepartidorDAO repartidorDAO = new RepartidorDAO();
-        List<Repartidor> repartidores = repartidorDAO.listarTodos();
         if (repartidores.isEmpty()) {
             JOptionPane.showMessageDialog(this,
                     "No hay repartidores en la base de datos, registra uno primero.",

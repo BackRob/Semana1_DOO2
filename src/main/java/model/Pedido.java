@@ -83,8 +83,20 @@ public abstract class Pedido implements Cancelable, Despachable, Rastreable {
 
     public abstract double calcularTiempoEntrega();
 
-    //tipo que se guarda en la columna tipo de la tabla pedido
+    //tipo que se guarda en la columna tipo de la tabla pedidos
     public abstract String getTipo();
+
+    //semana 8: crea el pedido de la subclase correcta segun el tipo (COMIDA, ENCOMIENDA, EXPRESS)
+    //devuelve null si el tipo no es valido
+    public static Pedido crear(String tipo, int idPedido, String direccionEntrega) {
+        if (tipo == null) return null;
+        return switch (tipo.toUpperCase()) {
+            case "COMIDA" -> new PedidoComida(idPedido, direccionEntrega, 0);
+            case "ENCOMIENDA" -> new PedidoEncomienda(idPedido, direccionEntrega, 0);
+            case "EXPRESS" -> new PedidoExpress(idPedido, direccionEntrega, 0);
+            default -> null;
+        };
+    }
 
     //METODO ToString
     @Override
