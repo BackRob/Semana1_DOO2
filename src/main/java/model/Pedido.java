@@ -22,6 +22,14 @@ public abstract class Pedido implements Cancelable, Despachable, Rastreable {
         estadoPedido = EstadoPedido.PENDIENTE;
     }
 
+    //constructor semana 6, el id lo ingresa el usuario desde el formulario
+    public Pedido(int idPedido, String direccionEntrega, double distanciaKm) {
+        this.idPedido = idPedido;
+        setDireccionEntrega(direccionEntrega);
+        setDistanciaKm(distanciaKm);
+        estadoPedido = EstadoPedido.PENDIENTE;
+    }
+
     //sets
     public void setDireccionEntrega(String direccionEntrega) {
         if (direccionEntrega != null && !direccionEntrega.isEmpty()) {

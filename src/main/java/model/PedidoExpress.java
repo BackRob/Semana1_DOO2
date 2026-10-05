@@ -6,6 +6,11 @@ public class PedidoExpress extends Pedido {
         super(direccionEntrega, distanciaKm);
     }
 
+    //constructor con id, usado desde la ventana de registro
+    public PedidoExpress(int idPedido, String direccionEntrega, double distanciaKm) {
+        super(idPedido, direccionEntrega, distanciaKm);
+    }
+
     @Override
     public double calcularTiempoEntrega() {
         return getDistanciaKm() > 5 ? 15 : 10;
