@@ -1,5 +1,9 @@
 package vista;
 
+import dao.PedidoDAO;
+import dao.RepartidorDAO;
+import model.EstadoPedido;
+import model.Pedido;
 import model.Repartidor;
 import model.ZonaDeCarga;
 
@@ -7,6 +11,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.List;
 
 
 public class VentanaPrincipal extends JFrame{
@@ -15,12 +20,13 @@ public class VentanaPrincipal extends JFrame{
     private JButton btnRegistrarPedido;
     private JButton btnAsignarPedidos;
     private JButton btnListarPedidos;
+    private JButton btnRegistrarRepartidor;
 
     public VentanaPrincipal() throws HeadlessException {
         setTitle("SpeedFast - Menu Principal");
         setContentPane(jInicio);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setSize(350, 250);
+        setSize(350, 280);
         setLocationRelativeTo(null);
         setResizable(false);
 
@@ -30,6 +36,15 @@ public class VentanaPrincipal extends JFrame{
             public void actionPerformed(ActionEvent e) {
                 VentanaRegistroPedido ventanaRegistro = new VentanaRegistroPedido();
                 ventanaRegistro.setVisible(true);
+            }
+        });
+
+        //semana 7: formulario de repartidores
+        btnRegistrarRepartidor.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                VentanaRegistroRepartidor ventanaRepartidor = new VentanaRegistroRepartidor();
+                ventanaRepartidor.setVisible(true);
             }
         });
 
@@ -50,10 +65,21 @@ public class VentanaPrincipal extends JFrame{
             }
         });
 
+        cargarPendientesBD();
+
     }
 
 
-    //pide los datos del repartidor y lo pone a trabajar con los pedidos de la zona de carga
+    //al abrir la app, los pedidos PENDIENTE que quedaron en la BD vuelven a la zona de carga
+    public void cargarPendientesBD() {
+        PedidoDAO pedidoDAO = new PedidoDAO();
+        for (Pedido pedido : pedidoDAO.listarPorEstado(EstadoPedido.PENDIENTE)) {
+            ZonaDeCarga.getInstance().agregarPedido(pedido);
+        }
+    }
+
+
+    //elige un repartidor de la BD y lo pone a trabajar con los pedidos de la zona de carga
     public void asignarRepartidor() {
         ZonaDeCarga zonaDeCarga = ZonaDeCarga.getInstance();
 
@@ -64,24 +90,42 @@ public class VentanaPrincipal extends JFrame{
             return;
         }
 
-        String nombre = pedirString("Nombre del repartidor:");
-        if (nombre == null) {
+        //semana 7: los repartidores salen de la base de datos
+        RepartidorDAO repartidorDAO = new RepartidorDAO();
+        List<Repartidor> repartidores = repartidorDAO.listarTodos();
+        if (repartidores.isEmpty()) {
+            JOptionPane.showMessageDialog(this,
+                    "No hay repartidores en la base de datos, registra uno primero.",
+                    "Aviso", JOptionPane.WARNING_MESSAGE);
             return;
         }
-        String rut = pedirString("Rut del repartidor:");
-        if (rut == null) {
+
+        String[] opciones = new String[repartidores.size()];
+        for (int i = 0; i < repartidores.size(); i++) {
+            opciones[i] = repartidores.get(i).getId() + " - " + repartidores.get(i).getNombre();
+        }
+        String elegido = (String) JOptionPane.showInputDialog(this,
+                "Selecciona el repartidor:", "Asignar Repartidor",
+                JOptionPane.QUESTION_MESSAGE, null, opciones, opciones[0]);
+        if (elegido == null) {
             return;
+        }
+
+        Repartidor repartidor = null;
+        for (int i = 0; i < opciones.length; i++) {
+            if (opciones[i].equals(elegido)) {
+                repartidor = repartidores.get(i);
+            }
         }
 
         int pendientes = zonaDeCarga.cantidadPendientes();
 
         //el repartidor es Runnable (semana 5), asi que se lanza en su propio hilo
-        Repartidor repartidor = new Repartidor(nombre, null, rut, zonaDeCarga);
-        Thread hilo = new Thread(repartidor, "Repartidor-" + nombre);
+        Thread hilo = new Thread(repartidor, "Repartidor-" + repartidor.getNombre());
         hilo.start();
 
         JOptionPane.showMessageDialog(this,
-                "Repartidor " + nombre + " inicio la entrega.\nPedidos pendientes en la zona de carga: " + pendientes,
+                "Repartidor " + repartidor.getNombre() + " inicio la entrega.\nPedidos pendientes en la zona de carga: " + pendientes,
                 "Entrega iniciada", JOptionPane.INFORMATION_MESSAGE);
     }
 

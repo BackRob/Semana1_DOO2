@@ -37,3 +37,6 @@ build/
 
 ### Mac OS ###
 .DS_Store
+
+### Datos de conexion (contraseña) ###
+db.properties

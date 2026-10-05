@@ -1,7 +1,7 @@
 package vista;
 
+import dao.PedidoDAO;
 import model.Pedido;
-import model.ZonaDeCarga;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -16,6 +16,7 @@ public class VentanaListaPedidos extends JFrame {
     private JButton btnRefrescar;
 
     private final DefaultTableModel modeloTabla;
+    private final PedidoDAO pedidoDAO = new PedidoDAO();
     private final Timer timerRefresco;
 
     public VentanaListaPedidos() throws HeadlessException {
@@ -26,7 +27,8 @@ public class VentanaListaPedidos extends JFrame {
         setLocationRelativeTo(null);
 
         //modelo de la tabla, las celdas no se pueden editar
-        String[] columnas = {"ID", "Tipo", "Direccion", "Distancia (km)", "Tiempo estimado (min)", "Estado"};
+        //columnas iguales a la tabla pedido de la BD
+        String[] columnas = {"ID", "Tipo", "Direccion", "Estado"};
         modeloTabla = new DefaultTableModel(columnas, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -51,8 +53,8 @@ public class VentanaListaPedidos extends JFrame {
             }
         });
 
-        //se refresca sola cada 1 segundo para ver como cambian los estados mientras reparten
-        timerRefresco = new Timer(1000, new ActionListener() {
+        //se refresca sola cada 2 segundos para ver como cambian los estados mientras reparten
+        timerRefresco = new Timer(2000, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 cargarTabla();
@@ -63,16 +65,14 @@ public class VentanaListaPedidos extends JFrame {
     }
 
 
-    //vuelve a llenar la tabla con la lista comun de la zona de carga
+    //semana 7: la tabla se llena con lo que hay en la base de datos
     public void cargarTabla() {
         modeloTabla.setRowCount(0);
-        for (Pedido pedido : ZonaDeCarga.getInstance().getPedidos()) {
+        for (Pedido pedido : pedidoDAO.listarTodos()) {
             modeloTabla.addRow(new Object[]{
                     pedido.getIdPedido(),
-                    pedido.getClass().getSimpleName().replace("Pedido", ""),
+                    pedido.getTipo(),
                     pedido.getDireccionEntrega(),
-                    pedido.getDistanciaKm(),
-                    pedido.calcularTiempoEntrega(),
                     pedido.getEstado()
             });
         }

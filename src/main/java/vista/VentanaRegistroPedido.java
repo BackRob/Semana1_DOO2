@@ -1,5 +1,6 @@
 package vista;
 
+import dao.PedidoDAO;
 import model.Pedido;
 import model.PedidoComida;
 import model.PedidoEncomienda;
@@ -13,7 +14,6 @@ import java.awt.event.ActionListener;
 
 public class VentanaRegistroPedido extends JFrame {
     private JPanel jPaneRegistro;
-    private JTextField jTextID;
     private JTextField jTextDireccion;
     private JTextField jTextDistancia;
     private JComboBox<TipoPedido> jComboTipo;
@@ -54,10 +54,7 @@ public class VentanaRegistroPedido extends JFrame {
 
 
     public void RegistrarPedido() {
-        String id=capturarJtextField(jTextID,"ID");
-        if (id==null) {
-            return;
-        }
+        //el ID ya no se pide, lo genera la base de datos (AUTO_INCREMENT)
         String direccion=capturarJtextField(jTextDireccion,"Direccion");
         if (direccion==null) {
             return;
@@ -72,21 +69,8 @@ public class VentanaRegistroPedido extends JFrame {
         }
 
         //validacion de numeros
-        int idPedido = capturarEntero(jTextID, id, "ID");
-        if (idPedido == -1) {
-            return;
-        }
         double distanciaKm = capturarDecimal(jTextDistancia, distancia, "Distancia");
         if (distanciaKm == -1) {
-            return;
-        }
-
-        //el id no se puede repetir
-        if (ZonaDeCarga.getInstance().existePedido(idPedido)) {
-            JOptionPane.showMessageDialog(this,
-                    "Ya existe un pedido con el ID " + idPedido + ".",
-                    "Error", JOptionPane.ERROR_MESSAGE);
-            jTextID.requestFocus();
             return;
         }
 
@@ -97,21 +81,30 @@ public class VentanaRegistroPedido extends JFrame {
             case Express -> new PedidoExpress(direccion, distanciaKm);
         };
 
+        //semana 7: se guarda en la tabla pedido
+        PedidoDAO pedidoDAO = new PedidoDAO();
+        if (!pedidoDAO.guardar(pedido)) {
+            JOptionPane.showMessageDialog(this,
+                    "No se pudo guardar el pedido en la base de datos.\nRevisa que MySQL este encendido y los datos de ConexionBD.",
+                    "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        //queda en la zona de carga para que lo tome un repartidor
         ZonaDeCarga.getInstance().agregarPedido(pedido);
 
         JOptionPane.showMessageDialog(this,
-                "Pedido " + idPedido + " (" + tipoPedido + ") registrado correctamente.",
+                "Pedido " + pedido.getIdPedido() + " (" + tipoPedido + ") registrado correctamente.",
                 "Confirmacion", JOptionPane.INFORMATION_MESSAGE);
         limpiarCampos();
     }
 
     //deja el formulario listo para otro pedido
     public void limpiarCampos() {
-        jTextID.setText("");
         jTextDireccion.setText("");
         jTextDistancia.setText("");
         jComboTipo.setSelectedIndex(-1);
-        jTextID.requestFocus();
+        jTextDireccion.requestFocus();
     }
 
 
@@ -143,23 +136,6 @@ public class VentanaRegistroPedido extends JFrame {
         }
 
         return texto.trim();
-    }
-
-    //valida que sea entero mayor a 0, si no devuelve -1
-    public int capturarEntero(JTextField campo, String texto, String nombreCampo) {
-        try {
-            int numero = Integer.parseInt(texto);
-            if (numero > 0) {
-                return numero;
-            }
-        } catch (NumberFormatException e) {
-            //cae al mensaje de error de abajo
-        }
-        JOptionPane.showMessageDialog(campo,
-                "El campo " + nombreCampo + " debe ser un numero entero mayor a 0.",
-                "Error", JOptionPane.ERROR_MESSAGE);
-        campo.requestFocus();
-        return -1;
     }
 
     //valida que sea numero mayor a 0 (acepta coma o punto), si no devuelve -1

@@ -8,15 +8,13 @@ import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public abstract class Pedido implements Cancelable, Despachable, Rastreable {
-    private static final AtomicInteger contadorGlobal = new AtomicInteger(1); // contador seguro para hilos
-    private final int idPedido;
+    private int idPedido; //ya no es final, en semana 7 el id lo genera la base de datos
     private String direccionEntrega;
     private double distanciaKm;
     private EstadoPedido estadoPedido;
 
     //constructor
     public Pedido(String direccionEntrega, double distanciaKm) {
-        idPedido = contadorGlobal.getAndIncrement();
         setDireccionEntrega(direccionEntrega);
         setDistanciaKm(distanciaKm);
         estadoPedido = EstadoPedido.PENDIENTE;
@@ -57,6 +55,11 @@ public abstract class Pedido implements Cancelable, Despachable, Rastreable {
         }
     }
 
+    //se usa cuando la BD devuelve el id generado (AUTO_INCREMENT)
+    public void setIdPedido(int idPedido) {
+        this.idPedido = idPedido;
+    }
+
     //gets
     public int getIdPedido() {
         return idPedido;
@@ -79,6 +82,9 @@ public abstract class Pedido implements Cancelable, Despachable, Rastreable {
     }
 
     public abstract double calcularTiempoEntrega();
+
+    //tipo que se guarda en la columna tipo de la tabla pedido
+    public abstract String getTipo();
 
     //METODO ToString
     @Override

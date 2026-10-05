@@ -17,6 +17,11 @@ public class PedidoExpress extends Pedido {
     }
 
     @Override
+    public String getTipo() {
+        return "EXPRESS";
+    }
+
+    @Override
     public String toString() {
         return "PedidoExpress -> " + super.toString();
     }

@@ -17,6 +17,11 @@ public class PedidoComida extends Pedido {
     }
 
     @Override
+    public String getTipo() {
+        return "COMIDA";
+    }
+
+    @Override
     public String toString() {
         return "PedidoComida -> " + super.toString();
     }

@@ -17,6 +17,11 @@ public class PedidoEncomienda extends Pedido {
     }
 
     @Override
+    public String getTipo() {
+        return "ENCOMIENDA";
+    }
+
+    @Override
     public String toString() {
         return "PedidoEncomienda -> " + super.toString();
     }
